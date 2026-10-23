@@ -1,6 +1,6 @@
 "use strict";
 
-import runSimulation from "./simulation_engine.js";
+import run_simulation from "./simulation_engine.js";
 
 const EXHAUSTIVE_LIMIT = 200;   // try every combination when there are this many or fewer
 const SEARCH_REPS = 20;         // replications per allocation while searching
@@ -82,7 +82,7 @@ function run_with_seed(input, seed)
     let new_input = structuredClone(input);
     new_input["simulation_settings"]["random_seed"] = seed;
 
-    return runSimulation(new_input);
+    return run_simulation(new_input);
 }
 
 function replicate_get_metrics(input, n)

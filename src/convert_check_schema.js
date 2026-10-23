@@ -3,6 +3,8 @@
 /**
  * Validates the raw input schema and converts it into the form the simulation engine uses.
  * All times are converted to minutes. Values are never rounded, so decimals pass through as-is.
+ * operating_hours.open, operating_hours.close and arrival_pattern.peak_time are times of day in hours,
+ * in [0, 24] (e.g. 10.5 is 10:30). In the output they become minutes after opening.
  * The input object is not modified.
  *
  * Output shape:
@@ -43,22 +45,37 @@ export default function convert_check_schema(schema)
     const settings = schema["simulation_settings"] ?? {};
     const constraints = schema["constraints"] ?? {};
 
-    // operating hours
-    const operating_hours = schema["operating_hours"];
-    check_num(operating_hours, "operating_hours", positive, "> 0");
+    // operating hours, as times of day in hours (e.g. 10.5 is 10:30)
+    const hours_in = schema["operating_hours"];
+    const is_hours_obj = typeof hours_in === "object" && hours_in !== null && !Array.isArray(hours_in);
+    if (!is_hours_obj)
+        errors.push(`operating_hours must be an object like { "open": 10, "close": 14 } (got ${JSON.stringify(hours_in)})`);
+    const open = is_hours_obj ? hours_in["open"] : undefined;
+    const close = is_hours_obj ? hours_in["close"] : undefined;
+    const time_of_day = (v) => v >= 0 && v <= 24;
+    if (is_hours_obj)
+    {
+        check_num(open, "operating_hours.open", time_of_day, "in [0, 24]");
+        check_num(close, "operating_hours.close", time_of_day, "in [0, 24]");
+    }
+    const hours_in_range = is_num(open) && is_num(close) && time_of_day(open) && time_of_day(close);
+    if (hours_in_range && close <= open)
+        errors.push(`operating_hours.close must be after operating_hours.open (got open ${open}, close ${close})`);
+    // true only if open and close are both usable, so the peak_time check can rely on them
+    const hours_ok = hours_in_range && close > open;
 
     // arrival pattern
     const is_bursty = arrivals["type"] === "bursty";
     if (!is_bursty && arrivals["type"] !== "consistent")
         errors.push(`arrival_pattern.type must be "bursty" or "consistent" (got ${JSON.stringify(arrivals["type"])})`);
     check_num(arrivals["avg_arrivals_per_hour"], "arrival_pattern.avg_arrivals_per_hour", positive, "> 0");
-    // peak_hour and burst_frac only shape bursty arrivals
+    // peak_time and burst_frac only shape bursty arrivals
     if (is_bursty)
     {
         check_num(arrivals["burst_frac"], "arrival_pattern.burst_frac", (v) => v >= 0 && v <= 1, "in [0, 1]");
-        check_num(arrivals["peak_hour"], "arrival_pattern.peak_hour",
-            (v) => v >= 0 && (!is_num(operating_hours) || v <= operating_hours),
-            "in [0, operating_hours] (hours after opening)");
+        check_num(arrivals["peak_time"], "arrival_pattern.peak_time",
+            (v) => time_of_day(v) && (!hours_ok || (v >= open && v <= close)),
+            hours_ok ? `in [${open}, ${close}] (between operating_hours.open and close)` : "in [0, 24]");
     }
 
     // stations
@@ -121,6 +138,10 @@ export default function convert_check_schema(schema)
     if (errors.length !== 0)
         throw new Error("Invalid input schema:\n  - " + errors.join("\n  - "));
 
+    // times of day, converted from hours to minutes
+    const open_min = open * 60;
+    const close_min = close * 60;
+
     // build the converted schema
     const stations = stations_in.map((_, id) =>
     {
@@ -139,11 +160,11 @@ export default function convert_check_schema(schema)
         "arrival_pattern": {
             "type": arrivals["type"],
             "avg_arrivals_per_min": arrivals["avg_arrivals_per_hour"] / 60,
-            // not used by consistent arrivals
-            "peak_min": is_bursty ? arrivals["peak_hour"] * 60 : NaN,
+            // minutes after opening; not used by consistent arrivals
+            "peak_min": is_bursty ? arrivals["peak_time"] * 60 - open_min : NaN,
             "burst_frac": is_bursty ? arrivals["burst_frac"] : NaN,
         },
-        "operating_mins": operating_hours * 60,
+        "operating_mins": close_min - open_min,
         "total_workers": max_total_workers,
         "simulation_settings": {
             "num_replications": settings["num_replications"],

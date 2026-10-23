@@ -7,8 +7,8 @@
   ],
   
   "routing": "linear",
-  "arrival_pattern": { "type": "bursty", "avg_arrivals_per_hour": 25, "peak_hour": 2, "burst_frac": 0.5 },
-  "operating_hours": 6,
+  "arrival_pattern": { "type": "bursty", "avg_arrivals_per_hour": 25, "peak_time": 12, "burst_frac": 0.5 },
+  "operating_hours": {"open":10.5, "close":13},
   "constraints": { "max_total_workers": 1 },
   "simulation_settings": { "num_replications": 100, "random_seed": 42 }
 }

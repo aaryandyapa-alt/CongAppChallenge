@@ -1,0 +1,29 @@
+# Auto-detect text files and normalize to LF in the repository
+* text=auto
+
+# Core JavaScript / TypeScript source files
+*.js text eol=lf
+*.jsx text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.json text eol=lf
+
+# Configuration and styling styles
+*.config.js text eol=lf
+*.config.ts text eol=lf
+.watchmanconfig text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+
+# Vector graphics / components
+*.svg text eol=lf
+
+# Ignore binary files from text normalization
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.ttf binary
+*.otf binary
