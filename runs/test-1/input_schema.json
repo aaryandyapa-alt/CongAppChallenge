@@ -1,0 +1,14 @@
+{
+  "stations": [
+    {
+      "id": 0, "label": "groceries", "workers": 1,
+      "service_time_minutes": { "distribution": "lognormal", "mean": 3, "stddev": 1 }
+    }
+  ],
+  
+  "routing": "linear",
+  "arrival_pattern": { "type": "bursty", "avg_arrivals_per_hour": 25, "peak_hour": 2, "burst_frac": 0.5 },
+  "operating_hours": 6,
+  "constraints": { "max_total_workers": 1 },
+  "simulation_settings": { "num_replications": 100, "random_seed": 42 }
+}
