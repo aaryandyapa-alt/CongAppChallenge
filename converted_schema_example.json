@@ -1,0 +1,7 @@
+{
+ "stations": [{ "id":0, "label":"label", "workers":3, "service_time": { "distribution":"lognormal", "mean":3, "stddev":1 } }],
+ "arrival_pattern": { "type":"bursty", "avg_arrivals_per_min":0.5, "peak_min":150, "burst_frac":0.5 },
+ "operating_mins":360,
+ "total_workers":3,
+ "simulation_settings": { "num_replications":50, "random_seed":42 }
+  }

@@ -216,7 +216,7 @@ function find_all_lowest_time()
     return output;
 }
 
-export default function runSimulation(inp)
+export default function run_simulation(inp)
 {
     input = inp;
     const seed = input["simulation_settings"]["random_seed"];
