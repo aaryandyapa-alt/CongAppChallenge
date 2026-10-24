@@ -7,7 +7,7 @@ import { blank_station } from "./form_to_schema.js";
  * convert_check_schema still checks the final schema before simulating; these are the friendly versions.
  */
 
-export const MAX_STATIONS = 20;
+export const MAX_STATIONS = 15;
 
 const is_blank = (v) => v === null || v === undefined || Number.isNaN(v);
 const is_whole = (v) => Number.isInteger(v);
@@ -45,11 +45,6 @@ export function check_form(form, mode)
     if (!open_error && !close_error && !hours_ok)
         errors["basics.close_time"] = "Closing time must be after opening time.";
 
-    if (is_blank(b.total_workers))
-        errors["basics.total_workers"] = "Enter the total number of workers.";
-    else if (!is_whole(b.total_workers) || b.total_workers < 0)
-        errors["basics.total_workers"] = "Total workers must be a whole number.";
-
     if (is_blank(b.station_count))
         errors["basics.station_count"] = "Enter the number of stations.";
     else if (!is_whole(b.station_count) || b.station_count < 1)
@@ -79,16 +74,14 @@ export function check_form(form, mode)
         if (!simple)
         {
             if (is_blank(a.burst_frac))
-                errors["arrivals.burst_frac"] = "Enter burst_frac.";
+                errors["arrivals.burst_frac"] = "Enter the burst fraction.";
             else if (a.burst_frac < 0 || a.burst_frac > 1)
-                errors["arrivals.burst_frac"] = "burst_frac must be between 0 and 1.";
+                errors["arrivals.burst_frac"] = "Burst fraction must be between 0 and 1.";
         }
     }
 
     // stations; ones past station_count were removed and aren't checked
     const count = errors["basics.station_count"] ? 0 : b.station_count;
-    let worker_sum = 0;
-    let workers_ok = true;
     for (let i=0; i<count; i++)
     {
         const s = form.stations[i] ?? blank_station();
@@ -104,10 +97,6 @@ export function check_form(form, mode)
                 errors[p + "workers"] = "Enter the number of workers.";
             else if (!is_whole(s.workers) || s.workers < 1)
                 errors[p + "workers"] = "A staffed station needs at least 1 worker (a whole number).";
-            if (errors[p + "workers"])
-                workers_ok = false;
-            else
-                worker_sum += s.workers;
         }
 
         if (is_blank(s.minutes))
@@ -124,24 +113,20 @@ export function check_form(form, mode)
             else if (s.distribution === "lognormal")
             {
                 if (is_blank(s.stddev))
-                    errors[p + "stddev"] = "Enter stddev.";
+                    errors[p + "stddev"] = "Enter the standard deviation.";
                 else if (s.stddev < 0)
-                    errors[p + "stddev"] = "stddev can't be negative.";
+                    errors[p + "stddev"] = "Standard deviation can't be negative.";
             }
         }
     }
-
-    // the total on Establishment Basics must match the stations
-    if (!errors["basics.total_workers"] && !errors["basics.station_count"] && workers_ok && worker_sum !== b.total_workers)
-        errors["basics.total_workers"] = `The stations have ${worker_sum} workers in total, but total workers is ${b.total_workers}.`;
 
     // Pro only; Simple uses fixed settings
     if (!simple)
     {
         if (is_blank(form.sim.replications) || !is_whole(form.sim.replications) || form.sim.replications < 1)
-            errors["sim.replications"] = "num_replications must be a whole number of at least 1.";
+            errors["sim.replications"] = "Replications must be a whole number of at least 1.";
         if (is_blank(form.sim.seed) || !is_whole(form.sim.seed))
-            errors["sim.seed"] = "random_seed must be a whole number.";
+            errors["sim.seed"] = "Random seed must be a whole number.";
     }
 
     return errors;

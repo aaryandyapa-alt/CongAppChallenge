@@ -129,6 +129,14 @@ export function DraftRunProvider({ children })
 }
 
 /**
+ * The star and error for one field, ready to spread onto a StarredField: <StarredField {...field_status(draft, errors, path)} />
+ */
+export function field_status(draft, errors, path)
+{
+    return { starred: !!draft.starred[path], error: errors[path] ?? null };
+}
+
+/**
  * For screens: const { draft, errors, edit_field, go_to_page, ... } = useDraftRun();
  * (React requires hook names to start with "use", so this one isn't snake_case.)
  */

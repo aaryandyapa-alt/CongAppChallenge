@@ -13,6 +13,7 @@ export default function RootLayout()
                 <Stack.Screen name="new-run" options={{ title: "New run" }} />
                 <Stack.Screen name="questions" options={{ title: "Questions" }} />
                 <Stack.Screen name="generating" options={{ title: "Generating values" }} />
+                <Stack.Screen name="intro" options={{ title: "Before you start" }} />
                 <Stack.Screen name="review" options={{ title: "Review" }} />
                 <Stack.Screen name="simulating" options={{ title: "Simulating" }} />
                 <Stack.Screen name="runs/[name]" options={{ title: "Saved run" }} />
