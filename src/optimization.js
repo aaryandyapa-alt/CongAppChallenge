@@ -4,11 +4,24 @@ import run_simulation from "./simulation_engine.js";
 
 const EXHAUSTIVE_LIMIT = 200;   // try every combination when there are this many or fewer
 
+// each score is a list compared in order; the later metrics only break ties
 const OBJECTIVES = {
-    "mean_wait": (m) => m["mean_wait"],
-    "p90_wait":  (m) => m["p90_wait"],
-    "balance":   (m) => m["balance"],
+    "mean_wait": (m) => [m["mean_wait"], m["p90_wait"], m["balance"]],
+    "p90_wait":  (m) => [m["p90_wait"], m["mean_wait"], m["balance"]],
+    "balance":   (m) => [m["balance"], m["mean_wait"], m["p90_wait"]],
 };
+const WORST_SCORE = [Infinity];
+
+// true if score a is strictly better (lower) than score b
+function better(a, b)
+{
+    for (let i=0; i<a.length; i++)
+    {
+        if (a[i] !== b[i])
+            return a[i] < b[i];
+    }
+    return false;
+}
 
 function gather_waits(customers)
 {
@@ -171,7 +184,7 @@ function exhaustive_search(get_metrics, total, n_stations)
 {
     const best = {};
     for (const name in OBJECTIVES)
-        best[name] = { "alloc": null, "score": Infinity };
+        best[name] = { "alloc": null, "score": WORST_SCORE };
 
     for (const alloc of calculate_combinations(total, n_stations))
     {
@@ -179,7 +192,7 @@ function exhaustive_search(get_metrics, total, n_stations)
         for (const [name, objective] of Object.entries(OBJECTIVES))
         {
             const sc = objective(metrics);
-            if (sc < best[name]["score"])
+            if (better(sc, best[name]["score"]))
                 best[name] = { "alloc": alloc, "score": sc };
         }
     }
@@ -203,13 +216,13 @@ function greedy_search(get_metrics, objective, total, n_stations, start=null)
         alloc = new Array(n_stations).fill(1);
         for (let remaining = total - n_stations; remaining > 0; remaining--)
         {
-            let best_k = 0, best = Infinity;
+            let best_k = 0, best = WORST_SCORE;
             for (let k=0; k<n_stations; k++)
             {
                 alloc[k]++;
                 const sc = score(alloc);
                 alloc[k]--;
-                if (sc < best)
+                if (better(sc, best))
                 {
                     best = sc;
                     best_k = k;
@@ -235,7 +248,7 @@ function greedy_search(get_metrics, objective, total, n_stations, start=null)
                 alloc[from]--; alloc[to]++;
                 const sc = score(alloc);
                 alloc[from]++; alloc[to]--;
-                if (sc < best)
+                if (better(sc, best))
                 {
                     best = sc;
                     best_move = [from, to];
@@ -256,7 +269,7 @@ function greedy_search(get_metrics, objective, total, n_stations, start=null)
 export default function run_optimizer(input)
 {
     const full_reps = input["simulation_settings"]["num_replications"];
-    const search_reps = Math.round(0.3*full_reps);
+    const search_reps = Math.max(1,Math.round(0.3*full_reps));
 
     // only staffed stations are optimized; customer-led stations stay at 0
     const staffed_ids = input["stations"].filter((s) => s["workers"] > 0).map((s) => s["id"]);
