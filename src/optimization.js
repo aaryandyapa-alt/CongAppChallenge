@@ -284,7 +284,11 @@ export default function run_optimizer(input)
         winners = { "mean_wait": best_mean, "p90_wait": best_p90, "balance": best_bal };
     }
 
-    // rerun the winners at full replications; if two winners are the same, the cache runs it only once
+    // the layout that was passed in, so the results can compare it against the winners
+    const current = staffed_ids.map((id) => input["stations"][id]["workers"]);
+    winners["current"] = current;
+
+    // rerun the winners and the current layout at full replications; if two are the same, the cache runs it only once
     const results = {};
     for (const [name, alloc] of Object.entries(winners))
     {

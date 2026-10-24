@@ -1,0 +1,4 @@
+// Random noise: winners are chosen on the 20 search replications, then scored again on different seeds. With [0,3,2], the balance pick [0,2,3] scored 0.106, slightly worse than current's 0.105. In the [1,1,6] case, the balance pick had a lower mean wait than the mean-wait pick.
+// Ties at zero in the greedy search: in the [5,5,5,5] case the p90 pick was [6,5,4,5], with a p90 wait of 0.11, while current had 0.00. With that many workers, most layouts have a p90 wait of exactly 0. The greedy search only accepts a change that strictly improves the score, so among tied layouts it settles on whichever it builds first, and it can't move off it.
+// Both can make "Best p90 wait" look worse than "Current config" on the results pages. That's honest, but confusing
+// say that the current layout is already about as good as it gets.
