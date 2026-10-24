@@ -12,6 +12,16 @@ export const MAX_STATIONS = 20;
 const is_blank = (v) => v === null || v === undefined || Number.isNaN(v);
 const is_whole = (v) => Number.isInteger(v);
 
+// TimeInput reports null when it's empty, and NaN when something is typed but isn't a real time
+function time_error(v, blank_message)
+{
+    if (v === null || v === undefined)
+        return blank_message;
+    if (Number.isNaN(v))
+        return "That isn't a real time. Use an hour from 1 to 12 and minutes from 0 to 59.";
+    return null;
+}
+
 /**
  * @param {object} form - The form, in the shape described in form_to_schema.js.
  * @param {string} mode - "simple" or "pro".
@@ -25,12 +35,14 @@ export function check_form(form, mode)
     const a = form.arrivals;
 
     // establishment basics
-    if (is_blank(b.open_time))
-        errors["basics.open_time"] = "Enter an opening time.";
-    if (is_blank(b.close_time))
-        errors["basics.close_time"] = "Enter a closing time.";
-    const hours_ok = !is_blank(b.open_time) && !is_blank(b.close_time) && b.close_time > b.open_time;
-    if (!is_blank(b.open_time) && !is_blank(b.close_time) && !hours_ok)
+    const open_error = time_error(b.open_time, "Enter an opening time.");
+    const close_error = time_error(b.close_time, "Enter a closing time.");
+    if (open_error)
+        errors["basics.open_time"] = open_error;
+    if (close_error)
+        errors["basics.close_time"] = close_error;
+    const hours_ok = !open_error && !close_error && b.close_time > b.open_time;
+    if (!open_error && !close_error && !hours_ok)
         errors["basics.close_time"] = "Closing time must be after opening time.";
 
     if (is_blank(b.total_workers))
@@ -56,8 +68,9 @@ export function check_form(form, mode)
     // the peak and how strong it is only matter for bursts
     if (a.type === "bursty")
     {
-        if (is_blank(a.peak_time))
-            errors["arrivals.peak_time"] = "Enter the busiest time of day.";
+        const peak_error = time_error(a.peak_time, "Enter the busiest time of day.");
+        if (peak_error)
+            errors["arrivals.peak_time"] = peak_error;
         else if (hours_ok && (a.peak_time < b.open_time || a.peak_time > b.close_time))
             errors["arrivals.peak_time"] = "The busiest time must be between opening and closing.";
 
