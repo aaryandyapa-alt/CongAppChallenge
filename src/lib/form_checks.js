@@ -7,6 +7,8 @@ import { blank_station } from "./form_to_schema.js";
  * convert_check_schema still checks the final schema before simulating; these are the friendly versions.
  */
 
+export const MAX_STATIONS = 20;
+
 const is_blank = (v) => v === null || v === undefined || Number.isNaN(v);
 const is_whole = (v) => Number.isInteger(v);
 
@@ -40,6 +42,8 @@ export function check_form(form, mode)
         errors["basics.station_count"] = "Enter the number of stations.";
     else if (!is_whole(b.station_count) || b.station_count < 1)
         errors["basics.station_count"] = "There must be at least 1 station.";
+    else if (b.station_count > MAX_STATIONS)
+        errors["basics.station_count"] = `There can be at most ${MAX_STATIONS} stations.`;
 
     // arrivals
     if (is_blank(a.type))
@@ -69,7 +73,7 @@ export function check_form(form, mode)
     }
 
     // stations; ones past station_count were removed and aren't checked
-    const count = is_whole(b.station_count) && b.station_count > 0 ? b.station_count : 0;
+    const count = errors["basics.station_count"] ? 0 : b.station_count;
     let worker_sum = 0;
     let workers_ok = true;
     for (let i=0; i<count; i++)
