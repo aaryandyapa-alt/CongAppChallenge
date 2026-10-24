@@ -5,13 +5,14 @@
  *
  * Form shape:
  * {
- *   basics:   { open_time, close_time, total_workers, station_count },   // times are minutes after midnight
+ *   basics:   { open_time, close_time, station_count },                  // times are minutes after midnight
  *   arrivals: { type, per_hour, peak_time, burst_level, burst_frac },    // type is "consistent" or "bursty"
  *   stations: [{ name, customer_led, workers, minutes, variance_level, distribution, stddev }],
  *   sim:      { replications, seed },
  * }
  * Blank fields are null. Levels are "low", "medium" or "high".
  * Simple mode uses the levels; Pro mode uses burst_frac, distribution, stddev and sim instead.
+ * There's no total-workers field: the total is always the sum of the stations' workers (see total_workers below).
  * stations can hold more entries than station_count: the extras are removed stations, kept so their values come back if the user re-adds them.
  */
 
@@ -43,11 +44,29 @@ export function blank_station()
 export function blank_form()
 {
     return {
-        basics: { open_time: null, close_time: null, total_workers: null, station_count: null },
+        basics: { open_time: null, close_time: null, station_count: null },
         arrivals: { type: null, per_hour: null, peak_time: null, burst_level: null, burst_frac: null },
         stations: [],
         sim: { replications: DEFAULT_REPLICATIONS, seed: DEFAULT_SEED },
     };
+}
+
+/**
+ * The total number of workers: the sum over the stations that are shown (customer-led ones have none).
+ * null if any staffed station's workers are still blank.
+ */
+export function total_workers(form)
+{
+    let total = 0;
+    for (const s of form.stations.slice(0, form.basics.station_count ?? 0))
+    {
+        if (s.customer_led)
+            continue;
+        if (!Number.isInteger(s.workers))
+            return null;
+        total += s.workers;
+    }
+    return total;
 }
 
 /**
@@ -86,7 +105,7 @@ export function form_to_schema(form, mode)
         "routing": "linear",
         "arrival_pattern": arrival_pattern,
         "operating_hours": { "open": form.basics.open_time / 60, "close": form.basics.close_time / 60 },
-        "constraints": { "max_total_workers": form.basics.total_workers },
+        "constraints": { "max_total_workers": total_workers(form) },
         "simulation_settings": simple
             ? { "num_replications": DEFAULT_REPLICATIONS, "random_seed": DEFAULT_SEED }
             : { "num_replications": form.sim.replications, "random_seed": form.sim.seed },
@@ -170,13 +189,8 @@ export function schema_to_form(schema)
     const hours = schema["operating_hours"] ?? {};
     const open_time = fill(to_minutes(hours["open"]), "basics.open_time", DEFAULTS["open_time"]);
     const close_time = fill(to_minutes(hours["close"]), "basics.close_time", DEFAULTS["close_time"]);
-    const worker_sum = form.stations.reduce((sum, s) => sum + (s.customer_led ? 0 : s.workers), 0);
-    form.basics = {
-        open_time: open_time,
-        close_time: close_time,
-        total_workers: fill(schema["constraints"]?.["max_total_workers"], "basics.total_workers", worker_sum),
-        station_count: form.stations.length,
-    };
+    // constraints.max_total_workers isn't read: the total is worked out from the stations
+    form.basics = { open_time: open_time, close_time: close_time, station_count: form.stations.length };
 
     const a = schema["arrival_pattern"] ?? {};
     const type = fill(a["type"], "arrivals.type", DEFAULTS["arrival_type"]);

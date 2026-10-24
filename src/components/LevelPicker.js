@@ -81,9 +81,9 @@ const styles = StyleSheet.create({
     box: {
         minHeight: 48, minWidth: 180, paddingHorizontal: 12, gap: 8,
         flexDirection: "row", alignItems: "center", justifyContent: "space-between",
-        borderWidth: 1, borderColor: "#c4c4c4", borderRadius: 8, backgroundColor: "#fff",
+        borderWidth: 2, borderColor: "#c4c4c4", borderRadius: 8, backgroundColor: "#fff",
     },
-    box_error: { borderColor: "#b3261e", borderWidth: 2 },
+    box_error: { borderColor: "#b3261e" },
     box_text: { fontSize: 17, color: "#1a1a1a" },
     placeholder: { color: "#888" },
     backdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.4)", justifyContent: "center", padding: 24 },

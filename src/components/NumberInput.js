@@ -54,7 +54,6 @@ export default function NumberInput({ value, on_change, whole = false, suffix, h
                 value={text}
                 onChangeText={handle_change}
                 inputMode={whole ? "numeric" : "decimal"}
-                selectTextOnFocus
                 maxLength={7}
                 accessibilityLabel={label}
             />
@@ -67,9 +66,10 @@ const styles = StyleSheet.create({
     row: { flexDirection: "row", alignItems: "center", gap: 8 },
     box: {
         minWidth: 72, minHeight: 48, paddingHorizontal: 12,
-        borderWidth: 1, borderColor: "#c4c4c4", borderRadius: 8,
+        borderWidth: 2, borderColor: "#c4c4c4", borderRadius: 8,
         fontSize: 18, color: "#1a1a1a", textAlign: "center", backgroundColor: "#fff",
     },
-    box_error: { borderColor: "#b3261e", borderWidth: 2 },
+    // only the color changes: changing the border width while typing made some phones re-select the text
+    box_error: { borderColor: "#b3261e" },
     suffix: { fontSize: 16, color: "#555" },
 });

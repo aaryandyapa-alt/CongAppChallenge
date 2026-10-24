@@ -51,8 +51,8 @@ export default function DevComponentsScreen()
             <StarredField label="Closing time" {...field("basics.close_time")}>
                 <TimeInput label="Closing time" default_pm value={f.basics.close_time} on_change={(v) => edit_field("basics.close_time", v)} />
             </StarredField>
-            <StarredField label="Total workers" {...field("basics.total_workers")}>
-                <NumberInput label="Total workers" whole value={f.basics.total_workers} on_change={(v) => edit_field("basics.total_workers", v)} />
+            <StarredField label="Station 2 (Groceries): workers" {...field("stations.1.workers")}>
+                <NumberInput label="Workers" whole value={f.stations[1].workers} on_change={(v) => edit_field("stations.1.workers", v)} />
             </StarredField>
             <StarredField label="Station 1 (Intake): average minutes per person" {...field("stations.0.minutes")}>
                 <NumberInput label="Average minutes" suffix="mins" value={f.stations[0].minutes} on_change={(v) => edit_field("stations.0.minutes", v)} />

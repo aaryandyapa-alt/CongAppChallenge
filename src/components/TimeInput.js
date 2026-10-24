@@ -11,6 +11,17 @@ function to_parts(value, default_pm)
     return { hour: String(h24 % 12 === 0 ? 12 : h24 % 12), minute: String(minute).padStart(2, "0"), pm: h24 >= 12 };
 }
 
+/**
+ * Minutes after midnight as a clock time for display, like "10:30 AM". Blank or impossible times give "".
+ */
+export function format_time(value)
+{
+    if (value === null || value === undefined || Number.isNaN(value))
+        return "";
+    const parts = to_parts(value, false);
+    return `${parts.hour}:${parts.minute} ${parts.pm ? "PM" : "AM"}`;
+}
+
 // what the boxes show -> minutes after midnight
 // null if both boxes are empty; NaN if something is typed but it isn't a real time (form_checks.js tells them apart)
 function to_minutes(parts)
@@ -67,7 +78,6 @@ export default function TimeInput({ value, on_change, default_pm = false, has_er
                 onChangeText={(t) => update({ hour: digits(t) })}
                 inputMode="numeric"
                 maxLength={2}
-                selectTextOnFocus
                 placeholder="hh"
                 accessibilityLabel={`${label}, hour`}
             />
@@ -78,7 +88,6 @@ export default function TimeInput({ value, on_change, default_pm = false, has_er
                 onChangeText={(t) => update({ minute: digits(t) })}
                 inputMode="numeric"
                 maxLength={2}
-                selectTextOnFocus
                 placeholder="mm"
                 accessibilityLabel={`${label}, minutes`}
             />
@@ -108,10 +117,11 @@ const styles = StyleSheet.create({
     row: { flexDirection: "row", alignItems: "center", gap: 6 },
     box: {
         width: 56, minHeight: 48,
-        borderWidth: 1, borderColor: "#c4c4c4", borderRadius: 8,
+        borderWidth: 2, borderColor: "#c4c4c4", borderRadius: 8,
         fontSize: 18, color: "#1a1a1a", textAlign: "center", backgroundColor: "#fff",
     },
-    box_error: { borderColor: "#b3261e", borderWidth: 2 },
+    // only the color changes: changing the border width while typing made some phones re-select the text
+    box_error: { borderColor: "#b3261e" },
     colon: { fontSize: 20, color: "#1a1a1a" },
     switch: { flexDirection: "row", marginLeft: 8, borderWidth: 1, borderColor: "#c4c4c4", borderRadius: 8, overflow: "hidden" },
     period: { minHeight: 48, paddingHorizontal: 12, justifyContent: "center", backgroundColor: "#fff" },

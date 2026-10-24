@@ -44,12 +44,12 @@ export default function NewRunScreen()
         if (is_duplicate)
         {
             set_name(final_name);
-            router.push("/review");
+            router.push("/intro");
         }
         else
         {
             begin_run(final_name, mode);
-            router.push(mode === "simple" ? "/questions" : "/review");
+            router.push(mode === "simple" ? "/questions" : "/intro");
         }
     }
 
@@ -110,10 +110,11 @@ const styles = StyleSheet.create({
     heading: { fontSize: 20, fontWeight: "600", color: "#1a1a1a", marginTop: 12 },
     name_box: {
         minHeight: 52, paddingHorizontal: 14,
-        borderWidth: 1, borderColor: "#c4c4c4", borderRadius: 8,
+        borderWidth: 2, borderColor: "#c4c4c4", borderRadius: 8,
         fontSize: 18, color: "#1a1a1a", backgroundColor: "#fff",
     },
-    name_box_error: { borderColor: "#b3261e", borderWidth: 2 },
+    // same width as normal so the box doesn't change while typing (see NumberInput)
+    name_box_error: { borderColor: "#b3261e" },
     error: { fontSize: 15, color: "#b3261e" },
     switch: { flexDirection: "row", borderWidth: 1, borderColor: "#c4c4c4", borderRadius: 8, overflow: "hidden" },
     option: { flex: 1, minHeight: 52, alignItems: "center", justifyContent: "center", paddingHorizontal: 8, backgroundColor: "#fff" },
