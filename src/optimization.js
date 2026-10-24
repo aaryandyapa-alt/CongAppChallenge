@@ -3,7 +3,6 @@
 import run_simulation from "./simulation_engine.js";
 
 const EXHAUSTIVE_LIMIT = 200;   // try every combination when there are this many or fewer
-const SEARCH_REPS = 20;         // replications per allocation while searching
 
 const OBJECTIVES = {
     "mean_wait": (m) => m["mean_wait"],
@@ -257,7 +256,7 @@ function greedy_search(get_metrics, objective, total, n_stations, start=null)
 export default function run_optimizer(input)
 {
     const full_reps = input["simulation_settings"]["num_replications"];
-    const search_reps = Math.min(SEARCH_REPS, full_reps);
+    const search_reps = Math.round(0.3*full_reps);
 
     // only staffed stations are optimized; customer-led stations stay at 0
     const staffed_ids = input["stations"].filter((s) => s["workers"] > 0).map((s) => s["id"]);
@@ -284,7 +283,11 @@ export default function run_optimizer(input)
         winners = { "mean_wait": best_mean, "p90_wait": best_p90, "balance": best_bal };
     }
 
-    // rerun the winners at full replications; if two winners are the same, the cache runs it only once
+    // the layout that was passed in, so the results can compare it against the winners
+    const current = staffed_ids.map((id) => input["stations"][id]["workers"]);
+    winners["current"] = current;
+
+    // rerun the winners and the current layout at full replications; if two are the same, the cache runs it only once
     const results = {};
     for (const [name, alloc] of Object.entries(winners))
     {
