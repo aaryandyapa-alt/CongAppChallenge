@@ -5,6 +5,7 @@ import { File, Directory, Paths } from "expo-file-system";
 // each run is stored like the runs/ folder in the repo:
 //   <document dir>/runs/<run name>/input_schema.json   (the raw schema, before convert_check_schema)
 //   <document dir>/runs/<run name>/output.json         (the result of run_optimizer)
+//   <document dir>/runs/<run name>/run_info.json       (name, mode and when it was run)
 const runs_dir = new Directory(Paths.document, "runs");
 
 function run_dir(name)
@@ -55,6 +56,17 @@ export async function save_output(name, output)
 export async function load_output(name)
 {
     return await read_json(run_dir(name), "output.json");
+}
+
+export async function save_info(name, info)
+{
+    await write_json(run_dir(name), "run_info.json", info);
+}
+
+// returns the saved run info, or null
+export async function load_info(name)
+{
+    return await read_json(run_dir(name), "run_info.json");
 }
 
 export function list_runs()
