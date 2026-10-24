@@ -159,18 +159,21 @@ export function has_errors(errors, prefix)
 const FORBIDDEN_CHARS = /[/\\:*?"<>|]/;
 
 /**
+ * Spaces at the start and end are ignored (phone keyboards often add one), so the run must be saved as name.trim().
+ *
  * @param {string} name - The name the user typed.
  * @param {string[]} existing_names - Names of the saved runs, from storage.list_runs().
  * @returns {string|null} A message if the name can't be used, or null if it's fine.
  */
 export function check_run_name(name, existing_names)
 {
-    if (!name || name.trim() === "")
+    name = (name ?? "").trim();
+    if (name === "")
         return "Enter a name for this run.";
     if (FORBIDDEN_CHARS.test(name))
         return "Names can't contain any of these: / \\ : * ? \" < > |";
-    if (name !== name.trim() || name.startsWith(".") || name.endsWith("."))
-        return "Names can't start or end with a space or a dot.";
+    if (name.startsWith(".") || name.endsWith("."))
+        return "Names can't start or end with a dot.";
     // some phones treat "Test" and "test" as the same folder
     if (existing_names.some((n) => n.toLowerCase() === name.toLowerCase()))
         return "A run with this name already exists.";
