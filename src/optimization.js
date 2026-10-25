@@ -36,6 +36,16 @@ function gather_waits(customers)
     return output;
 }
 
+// one station's utilization for one day: the share of its workers' time spent serving, between its first and last
+// service. null for customer-led stations (no workers) and stations nobody reached that day.
+// s is one of the per-station totals from run_simulation ({ workers, busy, earliest, latest }).
+function station_utilization(s)
+{
+    if (s["workers"] === 0 || s["earliest"] === Infinity)
+        return null;
+    return s["busy"] / (s["workers"] * (s["latest"] - s["earliest"]));
+}
+
 // stations: the per-station totals from run_simulation ({ workers, busy, earliest, latest }, in id order)
 function calculate_balance(stations)
 {
@@ -48,8 +58,7 @@ function calculate_balance(stations)
     for (const s of kept)
         kept_workers += s["workers"];
 
-    // each station's utilization: the share of its workers' time spent serving, between its first and last service
-    const u = kept.map((s) => s["busy"] / (s["workers"] * (s["latest"] - s["earliest"])));
+    const u = kept.map(station_utilization);
 
     let weighted_mean = 0;
     kept.forEach((s, i) => weighted_mean += u[i] * s["workers"]);
@@ -73,9 +82,13 @@ function run_with_seed(input, seed)
 function replicate_get_metrics(input, n)
 {
     let initial_seed = input["simulation_settings"]["random_seed"];
+    const n_stations = input["stations"].length;
 
     let waits = []; // by customer
-    let utilizations = []; // by day
+    let utilizations = []; // the balance of each day
+    // per station: utilization added up over the days it served anyone, and how many days that was
+    const busy_sum = new Array(n_stations).fill(0);
+    const busy_days = new Array(n_stations).fill(0);
     for (let seed=initial_seed; seed<initial_seed+n; seed++)
     {
         const day = run_with_seed(input, seed);
@@ -85,11 +98,26 @@ function replicate_get_metrics(input, n)
             waits.push(wait);
 
         utilizations.push(calculate_balance(day["stations"]));
+
+        for (let i=0; i<n_stations; i++)
+        {
+            const u = station_utilization(day["stations"][i]);
+            // days a station served nobody are left out of its average
+            if (u !== null)
+            {
+                busy_sum[i] += u;
+                busy_days[i]++;
+            }
+        }
     }
+
+    // per station, in id order: average utilization over the days it served anyone (0 to 1);
+    // null for customer-led stations and stations nobody ever reached
+    const utilization = busy_sum.map((sum, i) => busy_days[i] === 0 ? null : sum / busy_days[i]);
 
     // no customers arrived in any replication
     if (waits.length === 0)
-        return {"mean_wait":0, "p90_wait":0, "balance":0};
+        return {"mean_wait":0, "p90_wait":0, "balance":0, "utilization":utilization};
 
     let mean = 0;
     for (const wait of waits)
@@ -104,7 +132,7 @@ function replicate_get_metrics(input, n)
         balance += util;
     balance /= utilizations.length;
 
-    return {"mean_wait":mean, "p90_wait":p90, "balance":balance};
+    return {"mean_wait":mean, "p90_wait":p90, "balance":balance, "utilization":utilization};
 }
 
 function count_combinations(workers, stations)

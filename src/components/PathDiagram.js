@@ -9,9 +9,10 @@ import { COLORS } from "./theme.js";
  * Callers turn their own data into the list below, so the review Summary and the results pages can both use it.
  * It doesn't scroll by itself; put it inside the page's ScrollView.
  *
- * @param {{name: string, workers: number, minutes: number, variance: string, change?: number}[]} stations -
+ * @param {{name: string, workers: number, minutes: number, variance: string, change?: number, busy?: number}[]} stations -
  *     workers is 0 for a customer-led station; variance is the text to show, like "Varies some";
- *     change (optional) is how many workers this station gained or lost compared with the current setup.
+ *     change (optional) is how many workers this station gained or lost compared with the current setup;
+ *     busy (optional, 0 to 1) is the share of the time its workers spent serving, from the simulation's utilization.
  */
 export default function PathDiagram({ stations })
 {
@@ -23,7 +24,7 @@ export default function PathDiagram({ stations })
                     <View
                         style={[styles.box, s.change ? styles.box_changed : null]}
                         accessible
-                        accessibilityLabel={`Station ${i + 1}, ${s.name}: ${worker_text(s.workers)}${change_text(s.change, true)}, ${s.minutes} minutes, ${s.variance}`}
+                        accessibilityLabel={`Station ${i + 1}, ${s.name}: ${worker_text(s.workers)}${change_text(s.change, true)}, ${s.minutes} minutes, ${s.variance}${has_busy(s) ? `, ${busy_text(s.busy)}` : ""}`}
                     >
                         <Text style={styles.name}>{i + 1}. {s.name}</Text>
                         <Text style={styles.detail}>
@@ -31,6 +32,7 @@ export default function PathDiagram({ stations })
                             {s.change ? <Text style={styles.change}>{change_text(s.change, false)}</Text> : null}
                             {"  ·  "}{s.minutes} mins  ·  {s.variance}
                         </Text>
+                        {has_busy(s) ? <Text style={styles.detail}>{busy_text(s.busy)}</Text> : null}
                     </View>
                 </View>
             ))}
@@ -43,6 +45,16 @@ function worker_text(workers)
     if (workers === 0)
         return "Customer-led";
     return workers === 1 ? "1 worker" : `${workers} workers`;
+}
+
+// only staffed stations with a simulated value; customer-led stations and runs saved before utilization existed have none
+const has_busy = (s) => typeof s.busy === "number" && s.workers > 0;
+
+// "Busy 82% of the time"
+function busy_text(busy)
+{
+    const percent = Math.round(busy * 100);
+    return `Busy ${percent < 1 ? "under 1" : percent}% of the time`;
 }
 
 // " (+1)" on screen, or ", 1 more than now" for screen readers

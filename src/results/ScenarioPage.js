@@ -27,6 +27,8 @@ export default function ScenarioPage({ scenario_key, output, form, pro })
         minutes: s.minutes,
         variance: variance_text(s, pro),
         change: scenario_key === "current" ? 0 : scenario["workers"][i] - current["workers"][i],
+        // missing in runs saved before utilization was added; PathDiagram then leaves the line out
+        busy: scenario["metrics"]["utilization"]?.[i] ?? undefined,
     }));
 
     return (
