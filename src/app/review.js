@@ -46,8 +46,9 @@ export default function ReviewScreen()
     const pages = draft === null ? [] : build_pages(draft);
     const current = Math.min(draft?.page ?? 0, Math.max(pages.length - 1, 0));
 
-    // the header back arrow and Android's back button go to the previous page; on the first page they go back to the intro
-    const disable_prevention = usePreventRemove(draft !== null && current > 0, () => go_to_page(current - 1));
+    // the header back arrow and Android's back button go to the previous page; on the first page they go back to the intro.
+    // Once the run is finished, the simulating screen closes this one, so it stops blocking.
+    const disable_prevention = usePreventRemove(draft !== null && !draft.finished && current > 0, () => go_to_page(current - 1));
 
     // opened with no run being set up (for example from a stale link)
     if (draft === null)

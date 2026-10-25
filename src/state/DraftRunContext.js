@@ -15,6 +15,7 @@ import { check_form, MAX_STATIONS } from "../lib/form_checks.js";
  *   form,                    // see lib/form_to_schema.js
  *   starred,                 // form paths like "stations.1.minutes" -> true, for fields the AI couldn't fill
  *   edited_this_visit,       // starred paths changed on the current page; their stars clear when the page is left
+ *   finished,                // true once the simulation is done and the run is saved (missing before then)
  * }
  */
 
@@ -94,6 +95,10 @@ export function draft_reducer(draft, action)
             return { ...draft, page: action.page, starred: starred, edited_this_visit: [] };
         }
 
+        // the simulation finished and the run is saved; the review screens stop blocking Back so they can be closed
+        case "finish":
+            return { ...draft, finished: true };
+
         case "clear":
             return null;
 
@@ -118,6 +123,7 @@ export function DraftRunProvider({ children })
         fill_from_ai: (schema) => dispatch({ type: "fill_from_ai", schema: schema }),
         edit_field: (path, value) => dispatch({ type: "edit_field", path: path, value: value }),
         go_to_page: (page) => dispatch({ type: "go_to_page", page: page }),
+        finish_run: () => dispatch({ type: "finish" }),
         clear_draft: () => dispatch({ type: "clear" }),
     }), []);
 
