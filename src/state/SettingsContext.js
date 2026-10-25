@@ -11,6 +11,8 @@ export const DEFAULT_SETTINGS = {
     "results_arrows": true,
     // keep the Next / Submit bar above the keyboard; off leaves it behind the keyboard so the page has more room
     "bar_above_keyboard": true,
+    // Developer: show how long each simulation took, at the bottom of its results
+    "show_timings": false,
 };
 
 const SettingsContext = createContext(null);

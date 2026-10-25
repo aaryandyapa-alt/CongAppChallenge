@@ -1,16 +1,18 @@
 {
   "expo": {
-    "name": "queuing-app",
+    "name": "ShiftLime",
     "slug": "queuing-app",
     "version": "1.0.0",
-    "scheme": "queuingapp",
+    "scheme": "shiftlime",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.shiftlime.app"
     },
     "android": {
+      "package": "com.shiftlime.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
