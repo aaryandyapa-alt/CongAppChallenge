@@ -1,7 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
 
-import { VARIANCE_OPTIONS } from "../components/LevelPicker.js";
-import PathDiagram from "../components/PathDiagram.js";
+import PathDiagram, { variance_text } from "../components/PathDiagram.js";
 import { format_time } from "../components/TimeInput.js";
 import { total_workers } from "../lib/form_to_schema.js";
 
@@ -23,9 +22,7 @@ export default function SummaryPage({ draft, errors, station_count })
         name: or_dash(s.name),
         workers: s.customer_led ? 0 : or_dash(s.workers),
         minutes: or_dash(s.minutes),
-        variance: pro
-            ? (s.distribution === "lognormal" ? `Lognormal, SD ${or_dash(s.stddev)} mins` : "Exponential")
-            : or_dash(VARIANCE_OPTIONS.find((o) => o.value === s.variance_level)?.label),
+        variance: variance_text(s, pro),
     }));
 
     return (
