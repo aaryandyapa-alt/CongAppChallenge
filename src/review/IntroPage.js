@@ -1,4 +1,5 @@
 import { StyleSheet, Text } from "react-native";
+import { COLORS } from "../components/theme.js";
 
 const HOW_TO = "Next, you'll go through a few pages describing how your site runs. Tap Next to move through them, or tap a circle on the progress bar to jump to one.";
 
@@ -26,6 +27,6 @@ export default function IntroPage({ draft })
 }
 
 const styles = StyleSheet.create({
-    message: { fontSize: 20, lineHeight: 28, color: "#1a1a1a", marginTop: 24, marginBottom: 16 },
-    how_to: { fontSize: 16, lineHeight: 22, color: "#555" },
+    message: { fontSize: 20, lineHeight: 28, color: COLORS.text, marginTop: 24, marginBottom: 16 },
+    how_to: { fontSize: 16, lineHeight: 22, color: COLORS.text_muted },
 });

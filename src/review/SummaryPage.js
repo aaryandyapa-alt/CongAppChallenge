@@ -5,6 +5,7 @@ import PathDiagram, { variance_text } from "../components/PathDiagram.js";
 import { format_time } from "../components/TimeInput.js";
 import { check_overload } from "../lib/form_checks.js";
 import { total_workers } from "../lib/form_to_schema.js";
+import { COLORS } from "../components/theme.js";
 
 // "about 20", or "fewer than 1" for tiny rates
 function about(rate)
@@ -56,7 +57,7 @@ export default function SummaryPage({ draft, errors, station_count, saved = fals
                     </Text>
                     {/* overloaded runs took about 3x as long in testing (long queues mean many more events to simulate) */}
                     <View style={styles.warning_time}>
-                        <Ionicons name="time-outline" size={20} color="#7a4a00" />
+                        <Ionicons name="time-outline" size={20} color={COLORS.warning_text} />
                         <Text style={styles.warning_time_text}>
                             The simulation may end up taking multiple times longer than usual, which can mean a few minutes on some phones.
                         </Text>
@@ -78,12 +79,12 @@ export default function SummaryPage({ draft, errors, station_count, saved = fals
 
 const styles = StyleSheet.create({
     facts: { gap: 6, marginBottom: 20 },
-    fact: { fontSize: 18, color: "#1a1a1a" },
-    heading: { fontSize: 17, fontWeight: "600", color: "#1a1a1a" },
-    warning: { padding: 14, gap: 6, marginBottom: 20, borderRadius: 10, borderWidth: 2, borderColor: "#c77700", backgroundColor: "#fdf4e3" },
-    warning_title: { fontSize: 17, fontWeight: "700", color: "#7a4a00" },
-    warning_text: { fontSize: 16, lineHeight: 22, color: "#1a1a1a" },
-    warning_time: { flexDirection: "row", alignItems: "flex-start", gap: 8, marginTop: 4, paddingTop: 10, borderTopWidth: 1, borderTopColor: "#e8c98f" },
-    warning_time_text: { flex: 1, fontSize: 16, lineHeight: 22, fontWeight: "700", color: "#7a4a00" },
-    problems: { marginTop: 20, fontSize: 16, color: "#b3261e" },
+    fact: { fontSize: 18, color: COLORS.text },
+    heading: { fontSize: 17, fontWeight: "600", color: COLORS.text },
+    warning: { padding: 14, gap: 6, marginBottom: 20, borderRadius: 10, borderWidth: 2, borderColor: COLORS.starred, backgroundColor: COLORS.starred_light },
+    warning_title: { fontSize: 17, fontWeight: "700", color: COLORS.warning_text },
+    warning_text: { fontSize: 16, lineHeight: 22, color: COLORS.text },
+    warning_time: { flexDirection: "row", alignItems: "flex-start", gap: 8, marginTop: 4, paddingTop: 10, borderTopWidth: 1, borderTopColor: COLORS.warning_divider },
+    warning_time_text: { flex: 1, fontSize: 16, lineHeight: 22, fontWeight: "700", color: COLORS.warning_text },
+    problems: { marginTop: 20, fontSize: 16, color: COLORS.error },
 });

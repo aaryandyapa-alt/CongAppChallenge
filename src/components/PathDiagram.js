@@ -2,6 +2,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@react-native-vector-icons/ionicons";
 
 import { VARIANCE_OPTIONS } from "./LevelPicker.js";
+import { COLORS } from "./theme.js";
 
 /**
  * The path every person takes: stations as boxes, top to bottom in visiting order, joined by arrows.
@@ -18,7 +19,7 @@ export default function PathDiagram({ stations })
         <View style={styles.column}>
             {stations.map((s, i) => (
                 <View key={i} style={styles.step}>
-                    {i > 0 ? <Ionicons name="arrow-down" size={22} color="#555" style={styles.arrow} /> : null}
+                    {i > 0 ? <Ionicons name="arrow-down" size={22} color={COLORS.text_muted} style={styles.arrow} /> : null}
                     <View
                         style={[styles.box, s.change ? styles.box_changed : null]}
                         accessible
@@ -69,10 +70,10 @@ const styles = StyleSheet.create({
     column: { paddingVertical: 8 },
     step: { alignItems: "stretch" },
     arrow: { alignSelf: "center", marginVertical: 4 },
-    box: { minHeight: 100, paddingHorizontal: 16, paddingVertical: 22, gap: 8, justifyContent: "center", borderWidth: 2, borderColor: "#1d5fd1", borderRadius: 8, backgroundColor: "#fff" },
+    box: { minHeight: 100, paddingHorizontal: 16, paddingVertical: 22, gap: 8, justifyContent: "center", borderWidth: 2, borderColor: COLORS.accent, borderRadius: 8, backgroundColor: COLORS.surface },
     // stations whose workers changed get a tinted background so they stand out
-    box_changed: { backgroundColor: "#eef3fc", borderWidth: 3 },
-    name: { fontSize: 17, fontWeight: "600", color: "#1a1a1a" },
-    detail: { fontSize: 15, color: "#444" },
-    change: { fontWeight: "700", color: "#1d5fd1" },
+    box_changed: { backgroundColor: COLORS.accent_light, borderWidth: 3 },
+    name: { fontSize: 17, fontWeight: "600", color: COLORS.text },
+    detail: { fontSize: 15, color: COLORS.text_secondary },
+    change: { fontWeight: "700", color: COLORS.accent },
 });

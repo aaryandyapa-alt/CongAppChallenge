@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import { Alert, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@react-native-vector-icons/ionicons";
+import { COLORS } from "./theme.js";
 
 /**
  * A home icon for the header while a run is being set up. It asks first, since the run isn't saved
@@ -41,7 +42,7 @@ export default function HomeButton({ disable_prevention, ask: should_ask = true 
             accessibilityLabel="Home"
             accessibilityHint={should_ask ? "Leaves this run without saving" : undefined}
         >
-            <Ionicons name="home-outline" size={24} color="#1d5fd1" />
+            <Ionicons name="home-outline" size={24} color={COLORS.accent} />
         </Pressable>
     );
 }

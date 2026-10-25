@@ -3,6 +3,7 @@ import { Modal, Pressable, StyleSheet, Text } from "react-native";
 import { Ionicons } from "@react-native-vector-icons/ionicons";
 
 import { STARRED_BOX, StarredContext } from "./StarredField.js";
+import { COLORS } from "./theme.js";
 
 // Simple mode wording; never statistical terms
 export const VARIANCE_OPTIONS = [
@@ -49,7 +50,7 @@ export default function LevelPicker({ value, on_change, options, has_error = fal
                 accessibilityHint="Opens a list to choose from"
             >
                 <Text style={[styles.box_text, !selected && styles.placeholder]}>{selected ? selected.label : "Choose…"}</Text>
-                <Ionicons name="chevron-down" size={18} color="#555" />
+                <Ionicons name="chevron-down" size={18} color={COLORS.text_muted} />
             </Pressable>
 
             <Modal visible={open} transparent animationType="fade" onRequestClose={() => set_open(false)}>
@@ -70,7 +71,7 @@ export default function LevelPicker({ value, on_change, options, has_error = fal
                                     accessibilityState={{ selected: is_selected }}
                                 >
                                     <Text style={styles.option_text}>{o.label}</Text>
-                                    {is_selected ? <Ionicons name="checkmark" size={20} color="#1d5fd1" /> : null}
+                                    {is_selected ? <Ionicons name="checkmark" size={20} color={COLORS.accent} /> : null}
                                 </Pressable>
                             );
                         })}
@@ -85,15 +86,15 @@ const styles = StyleSheet.create({
     box: {
         minHeight: 48, minWidth: 180, paddingHorizontal: 12, gap: 8,
         flexDirection: "row", alignItems: "center", justifyContent: "space-between",
-        borderWidth: 2, borderColor: "#c4c4c4", borderRadius: 8, backgroundColor: "#fff",
+        borderWidth: 2, borderColor: COLORS.border, borderRadius: 8, backgroundColor: COLORS.surface,
     },
-    box_error: { borderColor: "#b3261e" },
-    box_text: { fontSize: 17, color: "#1a1a1a" },
-    placeholder: { color: "#888" },
-    backdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.4)", justifyContent: "center", padding: 24 },
-    sheet: { backgroundColor: "#fff", borderRadius: 12, paddingVertical: 8 },
-    title: { fontSize: 16, fontWeight: "600", color: "#555", paddingHorizontal: 16, paddingVertical: 12 },
+    box_error: { borderColor: COLORS.error },
+    box_text: { fontSize: 17, color: COLORS.text },
+    placeholder: { color: COLORS.placeholder },
+    backdrop: { flex: 1, backgroundColor: COLORS.backdrop, justifyContent: "center", padding: 24 },
+    sheet: { backgroundColor: COLORS.surface, borderRadius: 12, paddingVertical: 8 },
+    title: { fontSize: 16, fontWeight: "600", color: COLORS.text_muted, paddingHorizontal: 16, paddingVertical: 12 },
     option: { minHeight: 52, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-    option_selected: { backgroundColor: "#eef3fc" },
-    option_text: { fontSize: 18, color: "#1a1a1a" },
+    option_selected: { backgroundColor: COLORS.accent_light },
+    option_text: { fontSize: 18, color: COLORS.text },
 });

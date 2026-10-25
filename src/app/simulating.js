@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import LoadingScreen from "../components/LoadingScreen.js";
 import start_run from "../lib/start_run.js";
 import { useDraftRun } from "../state/DraftRunContext.js";
+import { COLORS } from "../components/theme.js";
 
 /**
  * "Simulating": runs the draft through the engine, saves it, then opens its results.
@@ -104,10 +105,10 @@ export default function SimulatingScreen()
 }
 
 const styles = StyleSheet.create({
-    error_screen: { flex: 1, padding: 24, gap: 14, justifyContent: "center", backgroundColor: "#f7f7f7" },
-    error_title: { fontSize: 22, fontWeight: "600", color: "#1a1a1a" },
-    error_text: { fontSize: 17, lineHeight: 24, color: "#1a1a1a" },
-    error_detail: { fontSize: 13, color: "#777" },
-    button: { marginTop: 12, minHeight: 52, borderRadius: 8, backgroundColor: "#1d5fd1", alignItems: "center", justifyContent: "center" },
-    button_text: { fontSize: 18, fontWeight: "600", color: "#fff" },
+    error_screen: { flex: 1, padding: 24, gap: 14, justifyContent: "center", backgroundColor: COLORS.background },
+    error_title: { fontSize: 22, fontWeight: "600", color: COLORS.text },
+    error_text: { fontSize: 17, lineHeight: 24, color: COLORS.text },
+    error_detail: { fontSize: 13, color: COLORS.text_detail },
+    button: { marginTop: 12, minHeight: 52, borderRadius: 8, backgroundColor: COLORS.accent, alignItems: "center", justifyContent: "center" },
+    button_text: { fontSize: 18, fontWeight: "600", color: COLORS.on_accent },
 });

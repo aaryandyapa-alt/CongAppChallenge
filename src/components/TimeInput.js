@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { STARRED_BOX, StarredContext } from "./StarredField.js";
+import { COLORS } from "./theme.js";
 
 // minutes after midnight -> what the boxes show
 function to_parts(value, default_pm)
@@ -134,15 +135,15 @@ const styles = StyleSheet.create({
     row: { flexDirection: "row", alignItems: "center", gap: 6 },
     box: {
         width: 56, minHeight: 48,
-        borderWidth: 2, borderColor: "#c4c4c4", borderRadius: 8,
-        fontSize: 18, color: "#1a1a1a", textAlign: "center", backgroundColor: "#fff",
+        borderWidth: 2, borderColor: COLORS.border, borderRadius: 8,
+        fontSize: 18, color: COLORS.text, textAlign: "center", backgroundColor: COLORS.surface,
     },
     // only the color changes: changing the border width while typing made some phones re-select the text
-    box_error: { borderColor: "#b3261e" },
-    colon: { fontSize: 20, color: "#1a1a1a" },
-    switch: { flexDirection: "row", marginLeft: 8, borderWidth: 1, borderColor: "#c4c4c4", borderRadius: 8, overflow: "hidden" },
-    period: { minHeight: 48, paddingHorizontal: 12, justifyContent: "center", backgroundColor: "#fff" },
-    period_selected: { backgroundColor: "#1d5fd1" },
-    period_text: { fontSize: 16, color: "#1a1a1a" },
-    period_text_selected: { color: "#fff", fontWeight: "600" },
+    box_error: { borderColor: COLORS.error },
+    colon: { fontSize: 20, color: COLORS.text },
+    switch: { flexDirection: "row", marginLeft: 8, borderWidth: 1, borderColor: COLORS.border, borderRadius: 8, overflow: "hidden" },
+    period: { minHeight: 48, paddingHorizontal: 12, justifyContent: "center", backgroundColor: COLORS.surface },
+    period_selected: { backgroundColor: COLORS.accent },
+    period_text: { fontSize: 16, color: COLORS.text },
+    period_text_selected: { color: COLORS.on_accent, fontWeight: "600" },
 });

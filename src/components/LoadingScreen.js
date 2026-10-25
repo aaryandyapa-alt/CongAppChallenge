@@ -1,4 +1,5 @@
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { COLORS } from "./theme.js";
 
 /**
  * A spinner with a message, for "Generating values" and "Simulating".
@@ -11,7 +12,7 @@ export default function LoadingScreen({ message, detail })
 {
     return (
         <View style={styles.screen} accessibilityLiveRegion="polite">
-            <ActivityIndicator size="large" color="#1d5fd1" />
+            <ActivityIndicator size="large" color={COLORS.accent} />
             <Text style={styles.message}>{message}</Text>
             {detail ? <Text style={styles.detail}>{detail}</Text> : null}
         </View>
@@ -19,7 +20,7 @@ export default function LoadingScreen({ message, detail })
 }
 
 const styles = StyleSheet.create({
-    screen: { flex: 1, alignItems: "center", justifyContent: "center", padding: 32, gap: 16, backgroundColor: "#f7f7f7" },
-    message: { fontSize: 22, fontWeight: "600", color: "#1a1a1a", textAlign: "center" },
-    detail: { fontSize: 16, lineHeight: 22, color: "#555", textAlign: "center" },
+    screen: { flex: 1, alignItems: "center", justifyContent: "center", padding: 32, gap: 16, backgroundColor: COLORS.background },
+    message: { fontSize: 22, fontWeight: "600", color: COLORS.text, textAlign: "center" },
+    detail: { fontSize: 16, lineHeight: 22, color: COLORS.text_muted, textAlign: "center" },
 });

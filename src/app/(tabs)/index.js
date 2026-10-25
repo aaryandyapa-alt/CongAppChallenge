@@ -5,6 +5,7 @@ import { Ionicons } from "@react-native-vector-icons/ionicons";
 
 import { format_date_time } from "../../components/TimeInput.js";
 import { list_runs, load_info } from "../../storage.js";
+import { COLORS } from "../../components/theme.js";
 
 // every saved run with its run_info.json, newest first
 async function load_runs()
@@ -61,7 +62,7 @@ export default function HomeScreen()
                     <Text style={styles.row_name}>{item.name}</Text>
                     <Text style={styles.row_detail}>{[format_date_time(item.date_run), mode].filter(Boolean).join("  ·  ")}</Text>
                 </View>
-                <Ionicons name="chevron-forward" size={22} color="#555" />
+                <Ionicons name="chevron-forward" size={22} color={COLORS.text_muted} />
             </Pressable>
         );
     }
@@ -78,7 +79,7 @@ export default function HomeScreen()
                     <View style={styles.top}>
                         <Text style={styles.heading}>Your runs</Text>
                         <View style={styles.search}>
-                            <Ionicons name="search" size={20} color="#666" />
+                            <Ionicons name="search" size={20} color={COLORS.text_faint} />
                             <TextInput
                                 style={styles.search_input}
                                 value={search}
@@ -90,7 +91,7 @@ export default function HomeScreen()
                             />
                             {search !== "" ? (
                                 <Pressable onPress={() => set_search("")} hitSlop={10} accessibilityRole="button" accessibilityLabel="Clear search">
-                                    <Ionicons name="close-circle" size={20} color="#888" />
+                                    <Ionicons name="close-circle" size={20} color={COLORS.placeholder} />
                                 </Pressable>
                             ) : null}
                         </View>
@@ -107,7 +108,7 @@ export default function HomeScreen()
             )}
 
             <Pressable style={styles.new} onPress={() => router.push("/new-run")} accessibilityRole="button" accessibilityLabel="New run">
-                <Ionicons name="add" size={24} color="#fff" />
+                <Ionicons name="add" size={24} color={COLORS.on_accent} />
                 <Text style={styles.new_text}>New</Text>
             </Pressable>
         </View>
@@ -115,30 +116,30 @@ export default function HomeScreen()
 }
 
 const styles = StyleSheet.create({
-    screen: { flex: 1, backgroundColor: "#f7f7f7" },
+    screen: { flex: 1, backgroundColor: COLORS.background },
     top: { paddingHorizontal: 16, paddingTop: 16, gap: 12 },
-    heading: { fontSize: 22, fontWeight: "700", color: "#1a1a1a" },
+    heading: { fontSize: 22, fontWeight: "700", color: COLORS.text },
     search: {
         flexDirection: "row", alignItems: "center", gap: 8, minHeight: 48, paddingHorizontal: 12,
-        borderRadius: 10, borderWidth: 2, borderColor: "#c4c4c4", backgroundColor: "#fff",
+        borderRadius: 10, borderWidth: 2, borderColor: COLORS.border, backgroundColor: COLORS.surface,
     },
-    search_input: { flex: 1, fontSize: 17, color: "#1a1a1a", paddingVertical: 8 },
+    search_input: { flex: 1, fontSize: 17, color: COLORS.text, paddingVertical: 8 },
     // room at the bottom so the New button never covers the last run
     list: { padding: 16, paddingBottom: 96 },
-    no_match: { fontSize: 16, color: "#555", textAlign: "center", marginTop: 24 },
+    no_match: { fontSize: 16, color: COLORS.text_muted, textAlign: "center", marginTop: 24 },
     row: {
         flexDirection: "row", alignItems: "center", gap: 12, minHeight: 68, padding: 14, marginBottom: 10,
-        borderRadius: 10, borderWidth: 2, borderColor: "#c4c4c4", backgroundColor: "#fff",
+        borderRadius: 10, borderWidth: 2, borderColor: COLORS.border, backgroundColor: COLORS.surface,
     },
     row_text: { flex: 1, gap: 4 },
-    row_name: { fontSize: 18, fontWeight: "600", color: "#1a1a1a" },
-    row_detail: { fontSize: 15, color: "#555" },
+    row_name: { fontSize: 18, fontWeight: "600", color: COLORS.text },
+    row_detail: { fontSize: 15, color: COLORS.text_muted },
     empty: { flex: 1, alignItems: "center", justifyContent: "center", padding: 32 },
-    empty_text: { fontSize: 18, lineHeight: 26, color: "#444", textAlign: "center" },
+    empty_text: { fontSize: 18, lineHeight: 26, color: COLORS.text_secondary, textAlign: "center" },
     new: {
         position: "absolute", right: 20, bottom: 20, minHeight: 56, paddingHorizontal: 22, borderRadius: 28,
-        flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "#1d5fd1",
-        elevation: 4, shadowColor: "#000", shadowOpacity: 0.2, shadowRadius: 6, shadowOffset: { width: 0, height: 3 },
+        flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: COLORS.accent,
+        elevation: 4, shadowColor: COLORS.shadow, shadowOpacity: 0.2, shadowRadius: 6, shadowOffset: { width: 0, height: 3 },
     },
-    new_text: { fontSize: 18, fontWeight: "600", color: "#fff" },
+    new_text: { fontSize: 18, fontWeight: "600", color: COLORS.on_accent },
 });
