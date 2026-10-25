@@ -6,17 +6,23 @@ import { File, Directory, Paths } from "expo-file-system";
 //   <document dir>/runs/<run name>/input_schema.json   (the raw schema, before convert_check_schema)
 //   <document dir>/runs/<run name>/output.json         (the result of run_optimizer)
 //   <document dir>/runs/<run name>/run_info.json       (name, mode and when it was run)
-const runs_dir = new Directory(Paths.document, "runs");
+// made on first use, not when this file loads: the web/server build (EAS Hosting, for the AI route) loads every
+// screen's files without a phone file system, and touching Paths there would crash it
+function runs_dir()
+{
+    return new Directory(Paths.document, "runs");
+}
 
 function run_dir(name)
 {
-    return new Directory(runs_dir, name);
+    return new Directory(runs_dir(), name);
 }
 
 async function write_json(dir, filename, obj)
 {
-    if (!runs_dir.exists)
-        runs_dir.create();
+    const runs = runs_dir();
+    if (!runs.exists)
+        runs.create();
     if (!dir.exists)
         dir.create();
 
@@ -70,16 +76,21 @@ export async function load_info(name)
 }
 
 // app settings live in <document dir>/settings.json, outside runs/ so list_runs never sees them
-const settings_file = new File(Paths.document, "settings.json");
+// made on first use, like runs_dir
+function settings_file()
+{
+    return new File(Paths.document, "settings.json");
+}
 
 // returns the saved settings, or {} if there are none yet (or the file can't be read)
 export async function load_settings()
 {
     try
     {
-        if (!settings_file.exists)
+        const file = settings_file();
+        if (!file.exists)
             return {};
-        return JSON.parse(await settings_file.text());
+        return JSON.parse(await file.text());
     }
     catch
     {
@@ -89,16 +100,18 @@ export async function load_settings()
 
 export async function save_settings(settings)
 {
-    if (!settings_file.exists)
-        settings_file.create();
-    await settings_file.write(JSON.stringify(settings));
+    const file = settings_file();
+    if (!file.exists)
+        file.create();
+    await file.write(JSON.stringify(settings));
 }
 
 export function list_runs()
 {
-    if (!runs_dir.exists)
+    const runs = runs_dir();
+    if (!runs.exists)
         return [];
-    return runs_dir.list().filter((item) => item instanceof Directory).map((item) => item.name);
+    return runs.list().filter((item) => item instanceof Directory).map((item) => item.name);
 }
 
 export function delete_run(name)

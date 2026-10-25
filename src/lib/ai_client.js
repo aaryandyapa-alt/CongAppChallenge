@@ -4,7 +4,7 @@ import fake_response from "./fake_ai_response.json";
 
 /**
  * Sends the five Simple-mode answers to the AI extraction proxy in one call.
- * The proxy holds the LLM API key, so it never ships inside the app.
+ * The proxy is the server route src/app/api/extract+api.js, which holds the Claude API key, so it never ships inside the app.
  *
  * Request:  POST { answers: { steps, workers, times, arrivals, hours } }
  * Response: { schema, missing_fields }, where schema is in the input-schema format (runs/test-1/input_schema.json)
@@ -12,19 +12,18 @@ import fake_response from "./fake_ai_response.json";
  *           missing_fields lists the same fields and is kept for reference.
  */
 
-// no proxy yet: use the fake response until it exists, then set PROXY_URL and turn this off
+// true until the Claude API key is set up (see the setup notes in src/app/api/extract+api.js); then turn this off
 const USE_FAKE = true;
-const PROXY_URL = "";
+// where the route is: during development "/api/extract" goes to the Expo dev server on the computer;
+// for the deployed app, set EXPO_PUBLIC_AI_PROXY_URL to the EAS Hosting address (it isn't secret)
+const PROXY_URL = process.env.EXPO_PUBLIC_AI_PROXY_URL || "/api/extract";
+// a shared code sent with every request so the proxy can turn away casual use of its address. It's inside the app,
+// so it's a deterrent, not real security (that's the spend limit on the Claude account).
+const APP_TOKEN = process.env.EXPO_PUBLIC_AI_APP_TOKEN || "";
 const TIMEOUT_MS = 30000;
 
-// the five questions, worded exactly as decided
-export const QUESTIONS = [
-    { key: "steps", text: "What are the steps someone goes through, in order?" },
-    { key: "workers", text: "How many people work at each step?" },
-    { key: "times", text: "About how long does each step take, and does it vary a lot or stay pretty consistent?" },
-    { key: "arrivals", text: "About how many people come in per hour, and is there a busier time of day?" },
-    { key: "hours", text: "When do you open and close?" },
-];
+// the five questions, worded exactly as decided (in their own file so the phone and the server use the same text)
+export { QUESTIONS } from "./questions.js";
 
 // thrown when the AI can't be reached or gives back something unusable
 export class AiUnreachableError extends Error {}
@@ -46,7 +45,8 @@ export async function extract(answers)
     {
         const response = await fetch(PROXY_URL, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            // the shared app token, if one is set (see the proxy's setup notes); empty is fine while it isn't
+            headers: { "Content-Type": "application/json", "x-app-token": APP_TOKEN },
             body: JSON.stringify({ "answers": answers }),
             signal: controller.signal,
         });
