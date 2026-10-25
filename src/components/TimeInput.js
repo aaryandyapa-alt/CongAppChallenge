@@ -22,6 +22,18 @@ export function format_time(value)
     return `${parts.hour}:${parts.minute} ${parts.pm ? "PM" : "AM"}`;
 }
 
+/**
+ * A saved run's date_run (an ISO string from run_info.json) for display, like "Oct 25, 2026, 2:30 PM". Missing gives "".
+ */
+export function format_date_time(iso)
+{
+    if (!iso)
+        return "";
+    const d = new Date(iso);
+    const date = d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+    return `${date}, ${format_time(d.getHours() * 60 + d.getMinutes())}`;
+}
+
 // what the boxes show -> minutes after midnight
 // null if both boxes are empty; NaN if something is typed but it isn't a real time (form_checks.js tells them apart)
 function to_minutes(parts)
