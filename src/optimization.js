@@ -269,7 +269,7 @@ function greedy_search(get_metrics, objective, total, n_stations, start=null)
 export default function run_optimizer(input)
 {
     const full_reps = input["simulation_settings"]["num_replications"];
-    const search_reps = Math.max(1,Math.round(0.3*full_reps));
+    const search_reps = Math.max(1,Math.round(0.2*full_reps));
 
     // only staffed stations are optimized; customer-led stations stay at 0
     const staffed_ids = input["stations"].filter((s) => s["workers"] > 0).map((s) => s["id"]);
