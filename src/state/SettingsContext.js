@@ -13,6 +13,8 @@ export const DEFAULT_SETTINGS = {
     "bar_above_keyboard": true,
     // Developer: show how long each simulation took, at the bottom of its results
     "show_timings": false,
+    // the welcome tutorial has been finished or skipped, so it isn't shown on launch again (Settings can replay it)
+    "seen_tutorial": false,
 };
 
 const SettingsContext = createContext(null);
@@ -20,7 +22,8 @@ const SettingsContext = createContext(null);
 // wraps the whole app in src/app/_layout.js
 export function SettingsProvider({ children })
 {
-    const [saved, set_saved] = useState({});
+    // null until settings.json has been read
+    const [saved, set_saved] = useState(null);
 
     useEffect(() =>
     {
@@ -29,6 +32,8 @@ export function SettingsProvider({ children })
 
     const value = useMemo(() => ({
         settings: { ...DEFAULT_SETTINGS, ...saved },
+        // false until the saved settings are in; decisions like showing the tutorial on launch wait for this
+        loaded: saved !== null,
         // changes one setting and saves the file
         change_setting: (key, setting_value) =>
         {
@@ -42,7 +47,7 @@ export function SettingsProvider({ children })
 }
 
 /**
- * For screens: const { settings, change_setting } = useSettings();
+ * For screens: const { settings, loaded, change_setting } = useSettings();
  */
 export function useSettings()
 {

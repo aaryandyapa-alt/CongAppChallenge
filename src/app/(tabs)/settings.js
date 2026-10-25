@@ -95,6 +95,10 @@ export default function SettingsScreen()
                     ShiftLime is a queue planner for food banks, pantries and clinics. Describe how people move through your site, and it tests every way to split your workers to show which works better.
                 </Text>
                 <Text style={styles.about}>Built for the Congressional App Challenge.</Text>
+                <Pressable style={styles.replay} onPress={() => router.push("/tutorial")} accessibilityRole="button">
+                    <Ionicons name="play-circle-outline" size={20} color={COLORS.accent} />
+                    <Text style={styles.replay_text}>Replay tutorial</Text>
+                </Pressable>
             </View>
 
             <Text style={styles.heading}>Saved runs</Text>
@@ -147,6 +151,8 @@ const styles = StyleSheet.create({
     danger_text: { fontSize: 17, fontWeight: "600", color: COLORS.error },
     card: { padding: 16, gap: 10, borderRadius: 10, backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.divider },
     about: { fontSize: 16, lineHeight: 23, color: COLORS.text },
+    replay: { minHeight: 48, marginTop: 4, borderRadius: 8, borderWidth: 2, borderColor: COLORS.accent, flexDirection: "row", gap: 8, alignItems: "center", justifyContent: "center" },
+    replay_text: { fontSize: 16, fontWeight: "600", color: COLORS.accent },
     setting_row: { flexDirection: "row", alignItems: "center", gap: 12 },
     setting_text: { flex: 1, gap: 4 },
     setting_label: { fontSize: 17, fontWeight: "600", color: COLORS.text },
