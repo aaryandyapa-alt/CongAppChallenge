@@ -1,4 +1,4 @@
-// TEMPORARY: ready-made runs for timing the simulation on a phone; delete in step 9 with Home's temporary links.
+// Ready-made runs for testing and timing the simulation, loaded from Settings > Developer (collapsed by default).
 // Each is an input schema, loaded like a duplicated run.
 
 import small from "../../runs/test-2/input_schema.json";

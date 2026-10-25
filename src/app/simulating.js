@@ -42,7 +42,8 @@ export default function SimulatingScreen()
 {
     const { draft, finish_run } = useDraftRun();
     const [error, set_error] = useState(null);
-    const [seconds, set_seconds] = useState(null);
+    // true once this screen's run has finished and been saved
+    const [done, set_done] = useState(false);
     // the latest progress update from start_run, or null before the first one
     const [update, set_update] = useState(null);
     // only run once, even if the screen re-renders
@@ -62,11 +63,11 @@ export default function SimulatingScreen()
         const timer = setTimeout(async () =>
         {
             fired = true;
-            const t0 = Date.now();
             try
             {
+                // start_run also saves how long the simulation took, in run_info.json
                 await start_run(draft.name, draft.mode, draft.form, set_update);
-                set_seconds((Date.now() - t0) / 1000);
+                set_done(true);
                 finish_run();
             }
             catch (e)
@@ -89,18 +90,17 @@ export default function SimulatingScreen()
     // Back from the results then goes Home, not into the finished review.
     useEffect(() =>
     {
-        if (!draft?.finished || seconds === null)
+        if (!draft?.finished || !done)
             return;
         const name = draft.name;
         // one tick later, so every screen has seen draft.finished first
         const timer = setTimeout(() =>
         {
             router.dismissAll();
-            // TEMPORARY: took= shows the run time on the results placeholder; remove in step 8
-            router.push({ pathname: "/results/[name]", params: { name: name, from: "new", took: seconds.toFixed(1) } });
+            router.push({ pathname: "/results/[name]", params: { name: name, from: "new" } });
         }, 0);
         return () => clearTimeout(timer);
-    }, [draft?.finished, draft?.name, seconds]);
+    }, [draft?.finished, draft?.name, done]);
 
     if (draft === null)
         return <Redirect href="/" />;

@@ -1,9 +1,10 @@
 import { router, useFocusEffect } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { Ionicons } from "@react-native-vector-icons/ionicons";
 
 import { format_date_time } from "../../components/TimeInput.js";
+import { useSettings } from "../../state/SettingsContext.js";
 import { list_runs, load_info } from "../../storage.js";
 import { COLORS } from "../../components/theme.js";
 
@@ -27,6 +28,19 @@ export default function HomeScreen()
     // null while loading
     const [runs, set_runs] = useState(null);
     const [search, set_search] = useState("");
+    const { settings, loaded } = useSettings();
+    // only open it once per app launch, even if Home re-renders before the tutorial marks itself seen
+    const opened_tutorial = useRef(false);
+
+    // first launch: show the welcome tutorial, once the saved settings are in (so returning users never see a flash of it)
+    useEffect(() =>
+    {
+        if (loaded && !settings["seen_tutorial"] && !opened_tutorial.current)
+        {
+            opened_tutorial.current = true;
+            router.push("/tutorial");
+        }
+    }, [loaded, settings]);
 
     // any part of the name, ignoring capitals and spaces at the ends
     const query = search.trim().toLowerCase();

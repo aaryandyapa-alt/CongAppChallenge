@@ -22,7 +22,7 @@ const PAGES = [...SCENARIOS, "summary"];
  */
 export default function ResultsScreen()
 {
-    const { name, from, took } = useLocalSearchParams();
+    const { name, from } = useLocalSearchParams();
     const { width } = useWindowDimensions();
     const insets = useSafeAreaInsets();
     const list = useRef(null);
@@ -112,8 +112,11 @@ export default function ResultsScreen()
 
             <View style={[styles.footer, { paddingBottom: 10 + insets.bottom }]}>
                 <Text style={styles.footer_text} accessibilityLiveRegion="polite">{index + 1} of {PAGES.length}</Text>
-                {/* TEMPORARY: how long the simulation took, for timing on phones; remove with the speed-up work */}
-                {took ? <Text style={styles.took}>Simulation took {took} s</Text> : null}
+                {/* how long the simulation took (saved in run_info.json), with Settings > Developer > Show timings on;
+                    runs saved before timings were kept have none */}
+                {settings["show_timings"] && typeof run.info?.simulation_seconds === "number" ? (
+                    <Text style={styles.took}>Simulation took {run.info.simulation_seconds.toFixed(1)} s</Text>
+                ) : null}
             </View>
         </View>
     );

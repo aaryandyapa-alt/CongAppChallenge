@@ -26,6 +26,8 @@ export default async function start_run(name, mode, form, on_progress)
 {
     const schema = form_to_schema(form, mode);
     const steps = run_optimizer_steps(convert_check_schema(schema));
+    // how long the simulation itself takes (not the saving), kept in run_info.json for Settings > Developer > Show timings
+    const started_at = Date.now();
 
     let shown = 0;
     let step = steps.next();
@@ -47,10 +49,11 @@ export default async function start_run(name, mode, form, on_progress)
         }
     }
     const output = step.value;
+    const simulation_seconds = (Date.now() - started_at) / 1000;
     on_progress?.({ fraction: 1, stage: "saving", alloc: null, staffed_ids: [], split: 0, splits: 0 });
 
     await save_input(name, schema);
     await save_output(name, output);
-    await save_info(name, { "name": name, "mode": mode, "date_run": new Date().toISOString() });
+    await save_info(name, { "name": name, "mode": mode, "date_run": new Date().toISOString(), "simulation_seconds": simulation_seconds });
     return output;
 }
