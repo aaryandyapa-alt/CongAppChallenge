@@ -76,7 +76,7 @@ export default function SavedRunScreen()
             <Stack.Screen options={{ title: name }} />
             <ScrollView contentContainerStyle={styles.body}>
                 <Text style={styles.meta}>
-                    {[format_date_time(run.info?.date_run), mode === "pro" ? "Pro" : "Simple"].filter(Boolean).join("  ·  ")}
+                    {[format_date_time(run.info?.date_run), mode === "pro" ? "Advanced" : "Simple"].filter(Boolean).join("  ·  ")}
                 </Text>
                 {/* the same summary the user saw before simulating; a saved run has no problems to show */}
                 <SummaryPage draft={{ form: form, mode: mode }} errors={{}} station_count={form.stations.length} />

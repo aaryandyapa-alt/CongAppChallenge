@@ -48,7 +48,8 @@ export default function HomeScreen()
 
     function render_run({ item })
     {
-        const mode = item.mode === "pro" ? "Pro" : item.mode === "simple" ? "Simple" : "";
+        // "pro" is the stored name for Advanced mode
+        const mode = item.mode === "pro" ? "Advanced" : item.mode === "simple" ? "Simple" : "";
         return (
             <Pressable
                 style={styles.row}

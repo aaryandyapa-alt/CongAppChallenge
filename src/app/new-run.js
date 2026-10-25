@@ -6,9 +6,10 @@ import { check_run_name } from "../lib/form_checks.js";
 import { useDraftRun } from "../state/DraftRunContext.js";
 import { list_runs } from "../storage.js";
 
+// the second mode is shown as "Advanced" but stored as "pro" (in the draft and run_info.json), so older saved runs still work
 const MODES = [
     { value: "simple", label: "Simple (Recommended)", description: "Answer a few questions in your own words and we'll fill in the details for you to check." },
-    { value: "pro", label: "Pro", description: "Fill in every setting yourself, including the exact statistics." },
+    { value: "pro", label: "Advanced", description: "Fill in every setting yourself, including the exact statistics." },
 ];
 
 /**

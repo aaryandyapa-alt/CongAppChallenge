@@ -11,7 +11,7 @@
  *   sim:      { replications, seed },
  * }
  * Blank fields are null. Levels are "low", "medium" or "high".
- * Simple mode uses the levels; Pro mode uses burst_frac, distribution, stddev and sim instead.
+ * Simple mode uses the levels; Pro mode (shown to users as "Advanced") uses burst_frac, distribution, stddev and sim instead.
  * There's no total-workers field: the total is always the sum of the stations' workers (see total_workers below).
  * stations can hold more entries than station_count: the extras are removed stations, kept so their values come back if the user re-adds them.
  */

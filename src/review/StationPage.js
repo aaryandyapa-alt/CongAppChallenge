@@ -2,7 +2,7 @@ import { TextInput, StyleSheet } from "react-native";
 
 import LevelPicker, { VARIANCE_OPTIONS } from "../components/LevelPicker.js";
 import NumberInput from "../components/NumberInput.js";
-import StarredField from "../components/StarredField.js";
+import StarredField, { STARRED_BOX } from "../components/StarredField.js";
 import { field_status } from "../state/DraftRunContext.js";
 
 export const STATION_TYPE_OPTIONS = [
@@ -34,7 +34,7 @@ export default function StationPage({ draft, errors, edit_field, index })
         <>
             <StarredField label="Station name" {...status("name")}>
                 <TextInput
-                    style={[styles.name_box, errors[p + "name"] && styles.name_box_error]}
+                    style={[styles.name_box, status("name").starred && STARRED_BOX, errors[p + "name"] && styles.name_box_error]}
                     value={s.name}
                     onChangeText={(v) => edit("name", v)}
                     placeholder="For example: Intake"
