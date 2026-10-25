@@ -26,6 +26,16 @@
       "expo-router",
       "@react-native-vector-icons/ionicons",
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "163a6504-b533-49ab-937f-f71feea6c9c8"
+      }
+    }
   }
 }

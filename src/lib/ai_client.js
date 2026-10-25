@@ -13,7 +13,7 @@ import fake_response from "./fake_ai_response.json";
  */
 
 // true until the Claude API key is set up (see the setup notes in src/app/api/extract+api.js); then turn this off
-const USE_FAKE = true;
+const USE_FAKE = false;
 // where the route is: during development "/api/extract" goes to the Expo dev server on the computer;
 // for the deployed app, set EXPO_PUBLIC_AI_PROXY_URL to the EAS Hosting address (it isn't secret)
 const PROXY_URL = process.env.EXPO_PUBLIC_AI_PROXY_URL || "/api/extract";
