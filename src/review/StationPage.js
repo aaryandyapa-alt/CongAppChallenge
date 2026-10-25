@@ -4,6 +4,7 @@ import LevelPicker, { VARIANCE_OPTIONS } from "../components/LevelPicker.js";
 import NumberInput from "../components/NumberInput.js";
 import StarredField, { STARRED_BOX } from "../components/StarredField.js";
 import { field_status } from "../state/DraftRunContext.js";
+import { COLORS } from "../components/theme.js";
 
 export const STATION_TYPE_OPTIONS = [
     { value: "staffed", label: "Staffed: workers help each person" },
@@ -86,9 +87,9 @@ export default function StationPage({ draft, errors, edit_field, index })
 const styles = StyleSheet.create({
     name_box: {
         minHeight: 48, paddingHorizontal: 12,
-        borderWidth: 2, borderColor: "#c4c4c4", borderRadius: 8,
-        fontSize: 18, color: "#1a1a1a", backgroundColor: "#fff",
+        borderWidth: 2, borderColor: COLORS.border, borderRadius: 8,
+        fontSize: 18, color: COLORS.text, backgroundColor: COLORS.surface,
     },
     // same width as normal so the box doesn't change while typing (see NumberInput)
-    name_box_error: { borderColor: "#b3261e" },
+    name_box_error: { borderColor: COLORS.error },
 });

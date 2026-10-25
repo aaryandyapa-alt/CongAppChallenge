@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import LoadingScreen from "../components/LoadingScreen.js";
 import { extract } from "../lib/ai_client.js";
 import { useDraftRun } from "../state/DraftRunContext.js";
+import { COLORS } from "../components/theme.js";
 
 /**
  * "Generating values": sends the five answers to the AI in one call, fills the draft from the reply, then opens the intro.
@@ -87,10 +88,10 @@ export default function GeneratingScreen()
 }
 
 const styles = StyleSheet.create({
-    error_screen: { flex: 1, padding: 24, gap: 14, justifyContent: "center", backgroundColor: "#f7f7f7" },
-    error_text: { fontSize: 18, lineHeight: 26, color: "#1a1a1a", marginBottom: 8 },
-    primary: { minHeight: 52, borderRadius: 8, backgroundColor: "#1d5fd1", alignItems: "center", justifyContent: "center" },
-    primary_text: { fontSize: 18, fontWeight: "600", color: "#fff" },
-    secondary: { minHeight: 52, borderRadius: 8, borderWidth: 2, borderColor: "#1d5fd1", alignItems: "center", justifyContent: "center", backgroundColor: "#fff" },
-    secondary_text: { fontSize: 18, fontWeight: "600", color: "#1d5fd1" },
+    error_screen: { flex: 1, padding: 24, gap: 14, justifyContent: "center", backgroundColor: COLORS.background },
+    error_text: { fontSize: 18, lineHeight: 26, color: COLORS.text, marginBottom: 8 },
+    primary: { minHeight: 52, borderRadius: 8, backgroundColor: COLORS.accent, alignItems: "center", justifyContent: "center" },
+    primary_text: { fontSize: 18, fontWeight: "600", color: COLORS.on_accent },
+    secondary: { minHeight: 52, borderRadius: 8, borderWidth: 2, borderColor: COLORS.accent, alignItems: "center", justifyContent: "center", backgroundColor: COLORS.surface },
+    secondary_text: { fontSize: 18, fontWeight: "600", color: COLORS.accent },
 });

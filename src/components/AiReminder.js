@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@react-native-vector-icons/ionicons";
+import { COLORS } from "./theme.js";
 
 /**
  * The small line at the top of each field page on runs the AI filled in, reminding the user to check the values.
@@ -9,7 +10,7 @@ export default function AiReminder()
 {
     return (
         <View style={styles.row} accessible accessibilityLabel="These values were filled in by AI from your answers. Please check them.">
-            <Ionicons name="sparkles-outline" size={16} color="#666" />
+            <Ionicons name="sparkles-outline" size={16} color={COLORS.text_faint} />
             <Text style={styles.text}>Filled in by AI from your answers. Please check them.</Text>
         </View>
     );
@@ -17,5 +18,5 @@ export default function AiReminder()
 
 const styles = StyleSheet.create({
     row: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 16 },
-    text: { flexShrink: 1, fontSize: 14, color: "#666", fontStyle: "italic" },
+    text: { flexShrink: 1, fontSize: 14, color: COLORS.text_faint, fontStyle: "italic" },
 });

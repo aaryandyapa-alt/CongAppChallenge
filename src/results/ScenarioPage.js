@@ -2,6 +2,7 @@ import { StyleSheet, Text, View } from "react-native";
 
 import PathDiagram, { variance_text } from "../components/PathDiagram.js";
 import { BALANCE_EXPLAINED, compared_with_current, measures, scenario_sentence, TITLES } from "../lib/result_sentences.js";
+import { COLORS } from "../components/theme.js";
 
 /**
  * One results page: the current setup, or the setup that does best on one measure.
@@ -26,6 +27,8 @@ export default function ScenarioPage({ scenario_key, output, form, pro })
         minutes: s.minutes,
         variance: variance_text(s, pro),
         change: scenario_key === "current" ? 0 : scenario["workers"][i] - current["workers"][i],
+        // missing in runs saved before utilization was added; PathDiagram then leaves the line out
+        busy: scenario["metrics"]["utilization"]?.[i] ?? undefined,
     }));
 
     return (
@@ -59,15 +62,15 @@ export default function ScenarioPage({ scenario_key, output, form, pro })
 }
 
 const styles = StyleSheet.create({
-    title: { fontSize: 24, fontWeight: "700", color: "#1a1a1a", marginBottom: 16 },
-    headline: { padding: 18, borderRadius: 10, backgroundColor: "#fff", borderWidth: 2, borderColor: "#1d5fd1", gap: 4, marginBottom: 16 },
-    headline_label: { fontSize: 16, color: "#444" },
-    headline_value: { fontSize: 34, fontWeight: "700", color: "#1a1a1a" },
-    compared: { fontSize: 16, color: "#1d5fd1", fontWeight: "600" },
-    sentence: { fontSize: 17, lineHeight: 24, color: "#1a1a1a", marginBottom: 16 },
-    other: { flexDirection: "row", justifyContent: "space-between", alignItems: "baseline", gap: 12, paddingVertical: 8, borderTopWidth: 1, borderTopColor: "#e2e2e2" },
-    other_label: { fontSize: 16, color: "#444", flexShrink: 1 },
-    other_value: { fontSize: 18, fontWeight: "600", color: "#1a1a1a" },
-    note: { fontSize: 14, lineHeight: 20, color: "#666", marginTop: 4, marginBottom: 20 },
-    heading: { fontSize: 17, fontWeight: "600", color: "#1a1a1a" },
+    title: { fontSize: 24, fontWeight: "700", color: COLORS.text, marginBottom: 16 },
+    headline: { padding: 18, borderRadius: 10, backgroundColor: COLORS.surface, borderWidth: 2, borderColor: COLORS.accent, gap: 4, marginBottom: 16 },
+    headline_label: { fontSize: 16, color: COLORS.text_secondary },
+    headline_value: { fontSize: 34, fontWeight: "700", color: COLORS.text },
+    compared: { fontSize: 16, color: COLORS.accent, fontWeight: "600" },
+    sentence: { fontSize: 17, lineHeight: 24, color: COLORS.text, marginBottom: 16 },
+    other: { flexDirection: "row", justifyContent: "space-between", alignItems: "baseline", gap: 12, paddingVertical: 8, borderTopWidth: 1, borderTopColor: COLORS.divider },
+    other_label: { fontSize: 16, color: COLORS.text_secondary, flexShrink: 1 },
+    other_value: { fontSize: 18, fontWeight: "600", color: COLORS.text },
+    note: { fontSize: 14, lineHeight: 20, color: COLORS.text_faint, marginTop: 4, marginBottom: 20 },
+    heading: { fontSize: 17, fontWeight: "600", color: COLORS.text },
 });

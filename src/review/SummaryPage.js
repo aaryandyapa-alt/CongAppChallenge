@@ -1,8 +1,17 @@
 import { StyleSheet, Text, View } from "react-native";
+import { Ionicons } from "@react-native-vector-icons/ionicons";
 
 import PathDiagram, { variance_text } from "../components/PathDiagram.js";
 import { format_time } from "../components/TimeInput.js";
+import { check_overload } from "../lib/form_checks.js";
 import { total_workers } from "../lib/form_to_schema.js";
+import { COLORS } from "../components/theme.js";
+
+// "about 20", or "fewer than 1" for tiny rates
+function about(rate)
+{
+    return rate < 1 ? "fewer than 1" : `about ${Math.round(rate)}`;
+}
 
 // blank fields show as a dash; they're also flagged on their own pages
 const or_dash = (v) => v === null || v === undefined || v === "" || Number.isNaN(v) ? "–" : v;
@@ -10,13 +19,15 @@ const or_dash = (v) => v === null || v === undefined || v === "" || Number.isNaN
 /**
  * The run at a glance before simulating: hours, arrivals, and the path through the stations.
  * The Start simulation button is in review.js's bottom bar.
+ * The saved-run screen reuses this with saved = true, which leaves out the warning about the simulation to come.
  */
-export default function SummaryPage({ draft, errors, station_count })
+export default function SummaryPage({ draft, errors, station_count, saved = false })
 {
     const { basics, arrivals, stations } = draft.form;
     const pro = draft.mode === "pro";
     const problem_count = Object.keys(errors).length;
     const total = total_workers(draft.form);
+    const overload = saved ? null : check_overload(draft.form);
 
     const diagram = stations.slice(0, station_count).map((s) => ({
         name: or_dash(s.name),
@@ -38,6 +49,22 @@ export default function SummaryPage({ draft, errors, station_count })
                 )}
             </View>
 
+            {overload ? (
+                <View style={styles.warning} accessible accessibilityLiveRegion="polite">
+                    <Text style={styles.warning_title}>Your stations may not keep up</Text>
+                    <Text style={styles.warning_text}>
+                        {`About ${Math.round(overload.arrivals)} people arrive per hour, but even with your workers split as well as possible, the stations can serve ${about(overload.capacity)} per hour. Waits will keep growing through the day.`}
+                    </Text>
+                    {/* overloaded runs took about 3x as long in testing (long queues mean many more events to simulate) */}
+                    <View style={styles.warning_time}>
+                        <Ionicons name="time-outline" size={20} color={COLORS.warning_text} />
+                        <Text style={styles.warning_time_text}>
+                            The simulation may end up taking multiple times longer than usual, which can mean a few minutes on some phones.
+                        </Text>
+                    </View>
+                </View>
+            ) : null}
+
             <Text style={styles.heading}>The path each person takes</Text>
             <PathDiagram stations={diagram} />
 
@@ -52,7 +79,12 @@ export default function SummaryPage({ draft, errors, station_count })
 
 const styles = StyleSheet.create({
     facts: { gap: 6, marginBottom: 20 },
-    fact: { fontSize: 18, color: "#1a1a1a" },
-    heading: { fontSize: 17, fontWeight: "600", color: "#1a1a1a" },
-    problems: { marginTop: 20, fontSize: 16, color: "#b3261e" },
+    fact: { fontSize: 18, color: COLORS.text },
+    heading: { fontSize: 17, fontWeight: "600", color: COLORS.text },
+    warning: { padding: 14, gap: 6, marginBottom: 20, borderRadius: 10, borderWidth: 2, borderColor: COLORS.starred, backgroundColor: COLORS.starred_light },
+    warning_title: { fontSize: 17, fontWeight: "700", color: COLORS.warning_text },
+    warning_text: { fontSize: 16, lineHeight: 22, color: COLORS.text },
+    warning_time: { flexDirection: "row", alignItems: "flex-start", gap: 8, marginTop: 4, paddingTop: 10, borderTopWidth: 1, borderTopColor: COLORS.warning_divider },
+    warning_time_text: { flex: 1, fontSize: 16, lineHeight: 22, fontWeight: "700", color: COLORS.warning_text },
+    problems: { marginTop: 20, fontSize: 16, color: COLORS.error },
 });

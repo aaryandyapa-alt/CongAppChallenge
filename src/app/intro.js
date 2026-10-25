@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import HomeButton from "../components/HomeButton.js";
 import IntroPage from "../review/IntroPage.js";
 import { useDraftRun } from "../state/DraftRunContext.js";
+import { COLORS } from "../components/theme.js";
 
 /**
  * The screen between starting a run (New run, the questions, or Duplicate) and the review pages.
@@ -35,9 +36,9 @@ export default function IntroScreen()
 }
 
 const styles = StyleSheet.create({
-    screen: { flex: 1, backgroundColor: "#f7f7f7" },
+    screen: { flex: 1, backgroundColor: COLORS.background },
     body: { padding: 20 },
-    bar: { paddingHorizontal: 20, paddingTop: 12, borderTopWidth: 1, borderTopColor: "#e2e2e2", backgroundColor: "#fff" },
-    button: { minHeight: 52, borderRadius: 8, backgroundColor: "#1d5fd1", alignItems: "center", justifyContent: "center" },
-    button_text: { fontSize: 18, fontWeight: "600", color: "#fff" },
+    bar: { paddingHorizontal: 20, paddingTop: 12, borderTopWidth: 1, borderTopColor: COLORS.divider, backgroundColor: COLORS.surface },
+    button: { minHeight: 52, borderRadius: 8, backgroundColor: COLORS.accent, alignItems: "center", justifyContent: "center" },
+    button_text: { fontSize: 18, fontWeight: "600", color: COLORS.on_accent },
 });

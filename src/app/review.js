@@ -1,5 +1,6 @@
 import { Redirect, Stack, router, usePreventRemove } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useHeaderHeight } from "expo-router/react-navigation";
+import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import AiReminder from "../components/AiReminder.js";
@@ -12,6 +13,8 @@ import SimSettingsPage from "../review/SimSettingsPage.js";
 import StationPage from "../review/StationPage.js";
 import SummaryPage from "../review/SummaryPage.js";
 import { useDraftRun } from "../state/DraftRunContext.js";
+import { useSettings } from "../state/SettingsContext.js";
+import { COLORS } from "../components/theme.js";
 
 // how many station pages to show; none while the count is blank or not a whole number
 function shown_station_count(count)
@@ -42,7 +45,9 @@ function build_pages(draft)
 export default function ReviewScreen()
 {
     const { draft, errors, edit_field, go_to_page } = useDraftRun();
+    const { settings } = useSettings();
     const insets = useSafeAreaInsets();
+    const header_height = useHeaderHeight();
 
     const pages = draft === null ? [] : build_pages(draft);
     const current = Math.min(draft?.page ?? 0, Math.max(pages.length - 1, 0));
@@ -94,6 +99,22 @@ export default function ReviewScreen()
     const button_text = is_last ? "Start simulation" : "Next";
     const button_disabled = is_last && !can_simulate;
 
+    const bar = (
+        <View style={[styles.bar, { paddingBottom: 12 + insets.bottom }]}>
+            <Pressable
+                style={[styles.button, button_disabled && styles.button_disabled]}
+                onPress={press_button}
+                disabled={button_disabled}
+                accessibilityRole="button"
+                accessibilityState={{ disabled: button_disabled }}
+            >
+                <Text style={styles.button_text}>{button_text}</Text>
+            </Pressable>
+        </View>
+    );
+    // the Settings option "Keep the Next button above the keyboard"; off leaves the bar behind the keyboard for more room
+    const bar_above_keyboard = settings["bar_above_keyboard"];
+
     return (
         <View style={styles.screen}>
             {/* the run's name in the header; iOS swipe-back only on the first page, since later pages go back a page instead */}
@@ -108,35 +129,29 @@ export default function ReviewScreen()
             <ProgressCircles pages={circles} current={current} on_jump={go_to_page} />
             <Text style={styles.title}>{page.name}</Text>
 
-            {/* a new key per page starts each page scrolled to the top */}
-            <ScrollView key={current} style={styles.body} contentContainerStyle={styles.body_content} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
-                {/* the reminder only shows on field pages of runs the AI filled in */}
-                {is_ai_filled && page.kind !== "summary" ? <AiReminder /> : null}
-                {content}
-            </ScrollView>
-
-            <View style={[styles.bar, { paddingBottom: 12 + insets.bottom }]}>
-                <Pressable
-                    style={[styles.button, button_disabled && styles.button_disabled]}
-                    onPress={press_button}
-                    disabled={button_disabled}
-                    accessibilityRole="button"
-                    accessibilityState={{ disabled: button_disabled }}
-                >
-                    <Text style={styles.button_text}>{button_text}</Text>
-                </Pressable>
-            </View>
+            {/* shrinks above the keyboard so the box being typed in stays visible (and the bar too, if it's inside).
+                "padding" on both platforms: Android's edge-to-edge mode doesn't resize the screen for the keyboard */}
+            <KeyboardAvoidingView style={styles.body} behavior="padding" keyboardVerticalOffset={header_height}>
+                {/* a new key per page starts each page scrolled to the top */}
+                <ScrollView key={current} style={styles.body} contentContainerStyle={styles.body_content} keyboardShouldPersistTaps="handled">
+                    {/* the reminder only shows on field pages of runs the AI filled in */}
+                    {is_ai_filled && page.kind !== "summary" ? <AiReminder /> : null}
+                    {content}
+                </ScrollView>
+                {bar_above_keyboard ? bar : null}
+            </KeyboardAvoidingView>
+            {bar_above_keyboard ? null : bar}
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    screen: { flex: 1, backgroundColor: "#f7f7f7" },
-    title: { fontSize: 22, fontWeight: "600", color: "#1a1a1a", paddingHorizontal: 20, paddingTop: 4, paddingBottom: 4 },
+    screen: { flex: 1, backgroundColor: COLORS.background },
+    title: { fontSize: 22, fontWeight: "600", color: COLORS.text, paddingHorizontal: 20, paddingTop: 4, paddingBottom: 4 },
     body: { flex: 1 },
     body_content: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 20 },
-    bar: { paddingHorizontal: 20, paddingTop: 12, borderTopWidth: 1, borderTopColor: "#e2e2e2", backgroundColor: "#fff" },
-    button: { minHeight: 52, borderRadius: 8, backgroundColor: "#1d5fd1", alignItems: "center", justifyContent: "center" },
-    button_disabled: { backgroundColor: "#9bb3e0" },
-    button_text: { fontSize: 18, fontWeight: "600", color: "#fff" },
+    bar: { paddingHorizontal: 20, paddingTop: 12, borderTopWidth: 1, borderTopColor: COLORS.divider, backgroundColor: COLORS.surface },
+    button: { minHeight: 52, borderRadius: 8, backgroundColor: COLORS.accent, alignItems: "center", justifyContent: "center" },
+    button_disabled: { backgroundColor: COLORS.accent_disabled },
+    button_text: { fontSize: 18, fontWeight: "600", color: COLORS.on_accent },
 });

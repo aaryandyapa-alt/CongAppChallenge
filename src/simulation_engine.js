@@ -1,6 +1,7 @@
 "use strict";
 
 import { mulberry32, exponential, lognormal, bursty_arrival, pick_random_index, createCounter } from "./random.js";
+import MinHeap from "./min_heap.js";
 
 // separate streams so a change in one (e.g. staffing changing how many service times are drawn) doesn't shift the others
 let rng_arrivals;
@@ -8,6 +9,7 @@ let rng_service;
 let rng_ties;
 let state;
 let event_list;
+let event_counter;   // numbers events in the order they're made, to break ties between events at the same time
 let input;
 let customer_counter;
 
@@ -18,7 +20,14 @@ class Event
         this.method = method;
         this.time = time;
         this.customer = customer;
+        this.seq = event_counter++;
     }
+}
+
+// true if event a comes before event b: earlier time first, then the order they were made
+function earlier(a, b)
+{
+    return a.time < b.time || (a.time === b.time && a.seq < b.seq);
 }
 
 class Customer
@@ -69,6 +78,10 @@ class Station
         this.workers = workers;
         this.in_service = 0;
         this.queue = [];
+        // running totals for the balance metric (see calculate_balance in optimization.js)
+        this.busy = 0;            // minutes spent serving
+        this.earliest = Infinity; // when the first service started
+        this.latest = 0;          // when the last service ended
     }
 
     pull_queue()
@@ -94,6 +107,9 @@ class Station
     {
         this.in_service++;
         customer.setServiceStart(this.pos, state["time"]);
+        // time only moves forward, so the first service is the earliest
+        if (this.earliest === Infinity)
+            this.earliest = state["time"];
 
         const dept_time = state["time"] + customer.service_times[this.pos]["service_length"];
         event_list.push(new Event((c) => this.departure(c), dept_time, customer));
@@ -103,6 +119,9 @@ class Station
     departure(customer)
     {
         customer.setServiceEnd(this.pos, state["time"])
+        this.busy += state["time"] - customer.service_times[this.pos]["start"];
+        // also only moves forward, so the last departure is the latest
+        this.latest = state["time"];
         this.pull_queue();
         const next_station = state[this.pos+1];
         next_station.arrival(customer);
@@ -195,27 +214,22 @@ function generate_next_customer()
 
 function find_all_lowest_time()
 {
-    let min_time = Infinity;
-    for (let i=0; i<event_list.length; i++)
-    {
-        if (event_list[i].time<min_time)
-            min_time = event_list[i].time;
-    }
-
-    let output = [];
-
-    for (let i=event_list.length-1; i>=0; i--)
-    {
-        if (event_list[i].time === min_time)
-        {
-            output.push(event_list[i]);
-            event_list.splice(i, 1);
-        }
-    }
-
+    const first = event_list.pop();
+    const output = [first];
+    while (event_list.size !== 0 && event_list.peek().time === first.time)
+        output.push(event_list.pop());
+    // the old list scan returned ties newest-first; keep that order so tie-breaking, and the results, stay the same
+    output.reverse();
     return output;
 }
 
+/**
+ * Simulates one day.
+ * @param {object} inp - The converted schema (see convert_check_schema.js).
+ * @returns {{customers: object, stations: object[]}} customers by id, with every station's queue, start and end times;
+ *     and per station (in id order) { workers, busy, earliest, latest }: minutes spent serving, and the first service
+ *     start and last service end (earliest is Infinity if nobody reached the station).
+ */
 export default function run_simulation(inp)
 {
     input = inp;
@@ -224,7 +238,8 @@ export default function run_simulation(inp)
     rng_service = mulberry32(seed ^ 0x9E3779B9);
     rng_ties = mulberry32(seed ^ 0x85EBCA6B);
     customer_counter = createCounter(0, 1);
-    event_list = [];
+    event_counter = 0;
+    event_list = new MinHeap(earlier);
     const stations = input["stations"];
     state = {};
     // each station's id is its position in the flow
@@ -252,7 +267,7 @@ export default function run_simulation(inp)
 
     // start loop
     generate_next_customer();
-    while (event_list.length !== 0)
+    while (event_list.size !== 0)
     {
         let events_now = find_all_lowest_time();
         state["time"] = events_now[0].time;
@@ -265,5 +280,10 @@ export default function run_simulation(inp)
         }
     }
 
-    return state["customers"];
+    // per-station totals for the balance metric, in station id order (index i is the station with id i)
+    const station_stats = [];
+    for (let i=0; i<stations.length; i++)
+        station_stats.push({ "workers": state[i].workers, "busy": state[i].busy, "earliest": state[i].earliest, "latest": state[i].latest });
+
+    return { "customers": state["customers"], "stations": station_stats };
 }

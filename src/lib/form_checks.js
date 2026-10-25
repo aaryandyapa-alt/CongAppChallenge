@@ -133,6 +133,43 @@ export function check_form(form, mode)
 }
 
 /**
+ * Whether the stations can keep up with the arrivals, even with the workers split as well as possible.
+ * Not a problem that blocks simulating, just a warning: waits will grow all day and the simulation takes longer.
+ *
+ * With the workers split ideally, the site can serve at most 60 * workers / (sum of each staffed station's minutes)
+ * people per hour (each person needs that many worker-minutes in total). Customer-led stations have no worker limit,
+ * so they don't count. Only the average rate is used: queues building during a rush hour are normal.
+ *
+ * @returns {{arrivals: number, capacity: number}|null} The two rates if the stations can't keep up; null if they can,
+ *     or if the numbers needed aren't filled in yet.
+ */
+export function check_overload(form)
+{
+    const per_hour = form.arrivals.per_hour;
+    const count = form.basics.station_count;
+    if (is_blank(per_hour) || per_hour <= 0 || !is_whole(count) || count < 1)
+        return null;
+
+    let workers = 0;
+    let minutes = 0;
+    for (const s of form.stations.slice(0, count))
+    {
+        if (s.customer_led)
+            continue;
+        if (!is_whole(s.workers) || s.workers < 1 || is_blank(s.minutes) || s.minutes <= 0)
+            return null;
+        workers += s.workers;
+        minutes += s.minutes;
+    }
+    // no staffed stations: nothing that can fall behind
+    if (workers === 0)
+        return null;
+
+    const capacity = 60 * workers / minutes;
+    return per_hour > capacity ? { arrivals: per_hour, capacity: capacity } : null;
+}
+
+/**
  * True if any problem is on the page whose fields start with prefix, like "basics." or "stations.2.".
  */
 export function has_errors(errors, prefix)

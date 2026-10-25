@@ -9,6 +9,7 @@ import { schema_to_form } from "../../lib/form_to_schema.js";
 import SummaryPage from "../../review/SummaryPage.js";
 import { useDraftRun } from "../../state/DraftRunContext.js";
 import { delete_run, load_info, load_input } from "../../storage.js";
+import { COLORS } from "../../components/theme.js";
 
 /**
  * A saved run: its inputs, plus View results, Duplicate and Delete.
@@ -79,7 +80,7 @@ export default function SavedRunScreen()
                     {[format_date_time(run.info?.date_run), mode === "pro" ? "Advanced" : "Simple"].filter(Boolean).join("  ·  ")}
                 </Text>
                 {/* the same summary the user saw before simulating; a saved run has no problems to show */}
-                <SummaryPage draft={{ form: form, mode: mode }} errors={{}} station_count={form.stations.length} />
+                <SummaryPage draft={{ form: form, mode: mode }} errors={{}} station_count={form.stations.length} saved />
             </ScrollView>
 
             <View style={[styles.bar, { paddingBottom: 12 + insets.bottom }]}>
@@ -92,11 +93,11 @@ export default function SavedRunScreen()
                 </Pressable>
                 <View style={styles.row}>
                     <Pressable style={styles.secondary} onPress={duplicate} accessibilityRole="button" accessibilityHint="Copies this run so you can change it and simulate again">
-                        <Ionicons name="copy-outline" size={20} color="#1d5fd1" />
+                        <Ionicons name="copy-outline" size={20} color={COLORS.accent} />
                         <Text style={styles.secondary_text}>Duplicate</Text>
                     </Pressable>
                     <Pressable style={[styles.secondary, styles.danger]} onPress={confirm_delete} accessibilityRole="button">
-                        <Ionicons name="trash-outline" size={20} color="#b3261e" />
+                        <Ionicons name="trash-outline" size={20} color={COLORS.error} />
                         <Text style={[styles.secondary_text, styles.danger_text]}>Delete</Text>
                     </Pressable>
                 </View>
@@ -106,20 +107,20 @@ export default function SavedRunScreen()
 }
 
 const styles = StyleSheet.create({
-    screen: { flex: 1, backgroundColor: "#f7f7f7" },
+    screen: { flex: 1, backgroundColor: COLORS.background },
     body: { padding: 20 },
-    meta: { fontSize: 15, color: "#555", marginBottom: 16 },
-    bar: { paddingHorizontal: 20, paddingTop: 12, gap: 10, borderTopWidth: 1, borderTopColor: "#e2e2e2", backgroundColor: "#fff" },
-    primary: { minHeight: 52, borderRadius: 8, backgroundColor: "#1d5fd1", alignItems: "center", justifyContent: "center" },
-    primary_text: { fontSize: 18, fontWeight: "600", color: "#fff" },
+    meta: { fontSize: 15, color: COLORS.text_muted, marginBottom: 16 },
+    bar: { paddingHorizontal: 20, paddingTop: 12, gap: 10, borderTopWidth: 1, borderTopColor: COLORS.divider, backgroundColor: COLORS.surface },
+    primary: { minHeight: 52, borderRadius: 8, backgroundColor: COLORS.accent, alignItems: "center", justifyContent: "center" },
+    primary_text: { fontSize: 18, fontWeight: "600", color: COLORS.on_accent },
     row: { flexDirection: "row", gap: 10 },
     secondary: {
-        flex: 1, minHeight: 48, borderRadius: 8, borderWidth: 2, borderColor: "#1d5fd1",
-        flexDirection: "row", gap: 6, alignItems: "center", justifyContent: "center", backgroundColor: "#fff",
+        flex: 1, minHeight: 48, borderRadius: 8, borderWidth: 2, borderColor: COLORS.accent,
+        flexDirection: "row", gap: 6, alignItems: "center", justifyContent: "center", backgroundColor: COLORS.surface,
     },
-    secondary_text: { fontSize: 16, fontWeight: "600", color: "#1d5fd1" },
-    danger: { borderColor: "#b3261e" },
-    danger_text: { color: "#b3261e" },
+    secondary_text: { fontSize: 16, fontWeight: "600", color: COLORS.accent },
+    danger: { borderColor: COLORS.error },
+    danger_text: { color: COLORS.error },
     missing: { alignItems: "center", justifyContent: "center", padding: 24 },
-    missing_text: { fontSize: 17, color: "#1a1a1a", textAlign: "center" },
+    missing_text: { fontSize: 17, color: COLORS.text, textAlign: "center" },
 });

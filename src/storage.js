@@ -69,6 +69,31 @@ export async function load_info(name)
     return await read_json(run_dir(name), "run_info.json");
 }
 
+// app settings live in <document dir>/settings.json, outside runs/ so list_runs never sees them
+const settings_file = new File(Paths.document, "settings.json");
+
+// returns the saved settings, or {} if there are none yet (or the file can't be read)
+export async function load_settings()
+{
+    try
+    {
+        if (!settings_file.exists)
+            return {};
+        return JSON.parse(await settings_file.text());
+    }
+    catch
+    {
+        return {};
+    }
+}
+
+export async function save_settings(settings)
+{
+    if (!settings_file.exists)
+        settings_file.create();
+    await settings_file.write(JSON.stringify(settings));
+}
+
 export function list_runs()
 {
     if (!runs_dir.exists)

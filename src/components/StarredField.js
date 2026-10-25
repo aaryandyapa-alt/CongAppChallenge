@@ -1,5 +1,6 @@
 import { createContext } from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { COLORS } from "./theme.js";
 
 /**
  * Lets the input inside a StarredField know it's starred, so it can color its own box amber
@@ -8,7 +9,7 @@ import { StyleSheet, Text, View } from "react-native";
 export const StarredContext = createContext(false);
 
 // box colors for a starred field; a field with a problem shows red instead
-export const STARRED_BOX = { borderColor: "#c77700", backgroundColor: "#fdf4e3" };
+export const STARRED_BOX = { borderColor: COLORS.starred, backgroundColor: COLORS.starred_light };
 
 /**
  * Wraps one input with its label, a star, and its error message.
@@ -43,7 +44,7 @@ export default function StarredField({ label, starred = false, error = null, chi
 const styles = StyleSheet.create({
     field: { gap: 8, marginBottom: 20 },
     label_row: { flexDirection: "row", alignItems: "flex-start", gap: 6 },
-    label: { fontSize: 17, color: "#1a1a1a", flexShrink: 1 },
-    star: { fontSize: 18, color: "#c77700" },
-    error: { fontSize: 15, color: "#b3261e" },
+    label: { fontSize: 17, color: COLORS.text, flexShrink: 1 },
+    star: { fontSize: 18, color: COLORS.starred },
+    error: { fontSize: 15, color: COLORS.error },
 });

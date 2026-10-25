@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@react-native-vector-icons/ionicons";
 
 import { measures, SCENARIOS, TITLES } from "../lib/result_sentences.js";
+import { COLORS } from "../components/theme.js";
 
 /**
  * The last results page: every setup side by side. The app never picks one for the user;
@@ -40,13 +41,13 @@ export default function ResultsSummaryPage({ output, on_jump, on_home })
                             <Text style={styles.row_value}>{shown.line}</Text>
                             {same_as_current ? <Text style={styles.same}>Same as your current setup</Text> : null}
                         </View>
-                        <Ionicons name="chevron-forward" size={22} color="#555" />
+                        <Ionicons name="chevron-forward" size={22} color={COLORS.text_muted} />
                     </Pressable>
                 );
             })}
 
             <Pressable style={styles.home} onPress={on_home} accessibilityRole="button">
-                <Ionicons name="home-outline" size={20} color="#fff" />
+                <Ionicons name="home-outline" size={20} color={COLORS.on_accent} />
                 <Text style={styles.home_text}>Back to Home</Text>
             </Pressable>
         </>
@@ -54,16 +55,16 @@ export default function ResultsSummaryPage({ output, on_jump, on_home })
 }
 
 const styles = StyleSheet.create({
-    title: { fontSize: 24, fontWeight: "700", color: "#1a1a1a", marginBottom: 8 },
-    intro: { fontSize: 16, lineHeight: 22, color: "#444", marginBottom: 16 },
+    title: { fontSize: 24, fontWeight: "700", color: COLORS.text, marginBottom: 8 },
+    intro: { fontSize: 16, lineHeight: 22, color: COLORS.text_secondary, marginBottom: 16 },
     row: {
         flexDirection: "row", alignItems: "center", gap: 12, minHeight: 72, padding: 14, marginBottom: 10,
-        borderRadius: 10, borderWidth: 2, borderColor: "#c4c4c4", backgroundColor: "#fff",
+        borderRadius: 10, borderWidth: 2, borderColor: COLORS.border, backgroundColor: COLORS.surface,
     },
     row_text: { flex: 1, gap: 4 },
-    row_title: { fontSize: 18, fontWeight: "600", color: "#1a1a1a" },
-    row_value: { fontSize: 16, color: "#444" },
-    same: { fontSize: 14, color: "#1d5fd1" },
-    home: { marginTop: 16, minHeight: 52, borderRadius: 8, backgroundColor: "#1d5fd1", flexDirection: "row", gap: 8, alignItems: "center", justifyContent: "center" },
-    home_text: { fontSize: 18, fontWeight: "600", color: "#fff" },
+    row_title: { fontSize: 18, fontWeight: "600", color: COLORS.text },
+    row_value: { fontSize: 16, color: COLORS.text_secondary },
+    same: { fontSize: 14, color: COLORS.accent },
+    home: { marginTop: 16, minHeight: 52, borderRadius: 8, backgroundColor: COLORS.accent, flexDirection: "row", gap: 8, alignItems: "center", justifyContent: "center" },
+    home_text: { fontSize: 18, fontWeight: "600", color: COLORS.on_accent },
 });

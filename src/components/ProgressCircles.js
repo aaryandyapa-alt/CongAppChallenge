@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import { COLORS } from "./theme.js";
 
 const SIDE_PADDING = 20;
 const VERTICAL_PADDING = 12;
@@ -56,7 +57,8 @@ export default function ProgressCircles({ pages, current, on_jump })
                             accessibilityLabel={`Page ${i + 1}: ${page.name}${status_text}`}
                         >
                             {show_numbers ? (
-                                <Text style={[styles.number, is_done && !page.status && styles.number_done]}>{i + 1}</Text>
+                                // the circle has a fixed size, so the number can only grow a little with the phone's text size
+                                <Text style={[styles.number, is_done && !page.status && styles.number_done]} maxFontSizeMultiplier={1.2}>{i + 1}</Text>
                             ) : null}
                         </Pressable>
                     );
@@ -68,15 +70,15 @@ export default function ProgressCircles({ pages, current, on_jump })
 
 const styles = StyleSheet.create({
     bar: { justifyContent: "center" },
-    track: { position: "absolute", height: LINE, borderRadius: LINE / 2, backgroundColor: "#d9d9d9" },
-    fill: { height: LINE, borderRadius: LINE / 2, backgroundColor: "#1d5fd1" },
+    track: { position: "absolute", height: LINE, borderRadius: LINE / 2, backgroundColor: COLORS.track },
+    fill: { height: LINE, borderRadius: LINE / 2, backgroundColor: COLORS.accent },
     row: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: SIDE_PADDING },
-    circle: { borderWidth: 2, borderColor: "#c4c4c4", backgroundColor: "#fff", alignItems: "center", justifyContent: "center" },
-    reached: { borderColor: "#1d5fd1" },
-    done: { backgroundColor: "#1d5fd1" },
-    starred: { borderColor: "#c77700", backgroundColor: "#fdf1dc" },
-    error: { borderColor: "#b3261e", backgroundColor: "#fbe4e2" },
+    circle: { borderWidth: 2, borderColor: COLORS.border, backgroundColor: COLORS.surface, alignItems: "center", justifyContent: "center" },
+    reached: { borderColor: COLORS.accent },
+    done: { backgroundColor: COLORS.accent },
+    starred: { borderColor: COLORS.starred, backgroundColor: COLORS.starred_light },
+    error: { borderColor: COLORS.error, backgroundColor: COLORS.error_light },
     current: { borderWidth: 4 },
-    number: { fontSize: 13, fontWeight: "600", color: "#1a1a1a" },
-    number_done: { color: "#fff" },
+    number: { fontSize: 13, fontWeight: "600", color: COLORS.text },
+    number_done: { color: COLORS.on_accent },
 });

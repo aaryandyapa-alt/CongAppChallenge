@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import { Alert, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@react-native-vector-icons/ionicons";
+import { COLORS } from "./theme.js";
 
 /**
  * A home icon for the header while a run is being set up. It asks first, since the run isn't saved
@@ -8,8 +9,9 @@ import { Ionicons } from "@react-native-vector-icons/ionicons";
  *
  * @param {Function} disable_prevention - From usePreventRemove, on screens that block going back
  *     (review.js); without it, leaving would be caught and just go back a page.
+ * @param {boolean} ask - Ask before leaving. Off where nothing would be lost (the results after a run, which is already saved).
  */
-export default function HomeButton({ disable_prevention })
+export default function HomeButton({ disable_prevention, ask: should_ask = true })
 {
     function leave()
     {
@@ -32,8 +34,15 @@ export default function HomeButton({ disable_prevention })
     }
 
     return (
-        <Pressable onPress={ask} hitSlop={10} style={styles.button} accessibilityRole="button" accessibilityLabel="Home" accessibilityHint="Leaves this run without saving">
-            <Ionicons name="home-outline" size={24} color="#1d5fd1" />
+        <Pressable
+            onPress={should_ask ? ask : leave}
+            hitSlop={10}
+            style={styles.button}
+            accessibilityRole="button"
+            accessibilityLabel="Home"
+            accessibilityHint={should_ask ? "Leaves this run without saving" : undefined}
+        >
+            <Ionicons name="home-outline" size={24} color={COLORS.accent} />
         </Pressable>
     );
 }
