@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+
+import { STARRED_BOX, StarredContext } from "./StarredField.js";
 
 // minutes after midnight -> what the boxes show
 function to_parts(value, default_pm)
@@ -62,6 +64,9 @@ function to_minutes(parts)
 export default function TimeInput({ value, on_change, default_pm = false, has_error = false, label })
 {
     const [parts, set_parts] = useState(to_parts(value, default_pm));
+    // amber boxes when the AI couldn't fill this field (red wins if there's also a problem)
+    const starred = useContext(StarredContext);
+    const box_style = [styles.box, starred && STARRED_BOX, has_error && styles.box_error];
 
     // if the value was changed from outside, show it; otherwise keep what's being typed
     // (Object.is, because NaN !== NaN would make this run on every render)
@@ -85,7 +90,7 @@ export default function TimeInput({ value, on_change, default_pm = false, has_er
     return (
         <View style={styles.row}>
             <TextInput
-                style={[styles.box, has_error && styles.box_error]}
+                style={box_style}
                 value={parts.hour}
                 onChangeText={(t) => update({ hour: digits(t) })}
                 inputMode="numeric"
@@ -95,7 +100,7 @@ export default function TimeInput({ value, on_change, default_pm = false, has_er
             />
             <Text style={styles.colon}>:</Text>
             <TextInput
-                style={[styles.box, has_error && styles.box_error]}
+                style={box_style}
                 value={parts.minute}
                 onChangeText={(t) => update({ minute: digits(t) })}
                 inputMode="numeric"

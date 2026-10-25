@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
+
+import { STARRED_BOX, StarredContext } from "./StarredField.js";
 
 // "" and "." mean the field is blank
 function parse(text)
@@ -25,6 +27,8 @@ export default function NumberInput({ value, on_change, whole = false, suffix, h
 {
     // the typed text is kept separately so in-between text like "2." isn't lost
     const [text, set_text] = useState(to_text(value));
+    // amber box when the AI couldn't fill this field (red wins if there's also a problem)
+    const starred = useContext(StarredContext);
 
     // if the value was changed from outside (like a duplicated run loading), show it;
     // changes that came from typing already match the text, so it's left alone
@@ -50,7 +54,7 @@ export default function NumberInput({ value, on_change, whole = false, suffix, h
     return (
         <View style={styles.row}>
             <TextInput
-                style={[styles.box, has_error && styles.box_error]}
+                style={[styles.box, starred && STARRED_BOX, has_error && styles.box_error]}
                 value={text}
                 onChangeText={handle_change}
                 inputMode={whole ? "numeric" : "decimal"}

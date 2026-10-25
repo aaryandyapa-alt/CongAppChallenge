@@ -1,4 +1,14 @@
+import { createContext } from "react";
 import { StyleSheet, Text, View } from "react-native";
+
+/**
+ * Lets the input inside a StarredField know it's starred, so it can color its own box amber
+ * (NumberInput, TimeInput and LevelPicker read it with useContext).
+ */
+export const StarredContext = createContext(false);
+
+// box colors for a starred field; a field with a problem shows red instead
+export const STARRED_BOX = { borderColor: "#c77700", backgroundColor: "#fdf4e3" };
 
 /**
  * Wraps one input with its label, a star, and its error message.
@@ -24,7 +34,7 @@ export default function StarredField({ label, starred = false, error = null, chi
                     </Text>
                 ) : null}
             </View>
-            {children}
+            <StarredContext value={starred}>{children}</StarredContext>
             {error ? <Text style={styles.error} accessibilityLiveRegion="polite">{error}</Text> : null}
         </View>
     );

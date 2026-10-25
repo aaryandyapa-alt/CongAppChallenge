@@ -2,6 +2,7 @@ import { Redirect, Stack, router, usePreventRemove } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import AiReminder from "../components/AiReminder.js";
 import HomeButton from "../components/HomeButton.js";
 import ProgressCircles from "../components/ProgressCircles.js";
 import { has_errors, MAX_STATIONS } from "../lib/form_checks.js";
@@ -69,6 +70,7 @@ export default function ReviewScreen()
     });
 
     const props = { draft: draft, errors: errors, edit_field: edit_field };
+    const is_ai_filled = draft.start_state === "ai-full" || draft.start_state === "ai-partial";
     let content;
     if (page.kind === "basics")
         content = <BasicsPage {...props} />;
@@ -108,6 +110,8 @@ export default function ReviewScreen()
 
             {/* a new key per page starts each page scrolled to the top */}
             <ScrollView key={current} style={styles.body} contentContainerStyle={styles.body_content} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
+                {/* the reminder only shows on field pages of runs the AI filled in */}
+                {is_ai_filled && page.kind !== "summary" ? <AiReminder /> : null}
                 {content}
             </ScrollView>
 

@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Modal, Pressable, StyleSheet, Text } from "react-native";
 import { Ionicons } from "@react-native-vector-icons/ionicons";
+
+import { STARRED_BOX, StarredContext } from "./StarredField.js";
 
 // Simple mode wording; never statistical terms
 export const VARIANCE_OPTIONS = [
@@ -28,6 +30,8 @@ export default function LevelPicker({ value, on_change, options, has_error = fal
 {
     const [open, set_open] = useState(false);
     const selected = options.find((o) => o.value === value);
+    // amber box when the AI couldn't fill this field (red wins if there's also a problem)
+    const starred = useContext(StarredContext);
 
     function choose(option_value)
     {
@@ -39,7 +43,7 @@ export default function LevelPicker({ value, on_change, options, has_error = fal
         <>
             <Pressable
                 onPress={() => set_open(true)}
-                style={[styles.box, has_error && styles.box_error]}
+                style={[styles.box, starred && STARRED_BOX, has_error && styles.box_error]}
                 accessibilityRole="button"
                 accessibilityLabel={`${label}: ${selected ? selected.label : "not chosen"}`}
                 accessibilityHint="Opens a list to choose from"

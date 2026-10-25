@@ -1,0 +1,28 @@
+{
+  "schema": {
+    "stations": [
+      {
+        "id": 0, "label": "Check-in", "workers": 2,
+        "service_time_minutes": { "distribution": "lognormal", "mean": 3, "stddev": 1.2 }
+      },
+      {
+        "id": 1, "label": "Groceries", "workers": 3,
+        "service_time_minutes": { "distribution": "lognormal", "mean": 6, "stddev": null }
+      },
+      {
+        "id": 2, "label": "Checkout", "workers": null,
+        "service_time_minutes": { "distribution": "lognormal", "mean": 2, "stddev": 0.8 }
+      }
+    ],
+    "routing": "linear",
+    "arrival_pattern": { "type": "bursty", "avg_arrivals_per_hour": 20, "peak_time": null, "burst_frac": 0.5 },
+    "operating_hours": { "open": 9, "close": 13 },
+    "constraints": { "max_total_workers": null },
+    "simulation_settings": null
+  },
+  "missing_fields": [
+    "stations[1].service_time_minutes.stddev",
+    "stations[2].workers",
+    "arrival_pattern.peak_time"
+  ]
+}

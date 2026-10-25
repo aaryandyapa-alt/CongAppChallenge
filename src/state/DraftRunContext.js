@@ -13,15 +13,16 @@ import { check_form, MAX_STATIONS } from "../lib/form_checks.js";
  *   start_state,             // "pro", "skipped", "ai-full", "ai-partial", "ai-failed" or "duplicate"; null before the questions
  *   page,                    // the review page being shown
  *   form,                    // see lib/form_to_schema.js
- *   starred,                 // form paths like "stations.1.minutes" -> true, for fields the AI couldn't fill
- *   edited_this_visit,       // starred paths changed on the current page; their stars clear when the page is left
+ *   starred,                 // form paths like "stations.1.minutes" -> true, for fields the AI couldn't fill;
+ *                            // a field's star clears as soon as its value changes
+ *   answers,                 // Simple mode: the five question answers, once submitted (missing before then)
  *   finished,                // true once the simulation is done and the run is saved (missing before then)
  * }
  */
 
 function new_draft(name, mode, start_state, form, starred)
 {
-    return { name: name, mode: mode, start_state: start_state, page: 0, form: form, starred: starred, edited_this_visit: [] };
+    return { name: name, mode: mode, start_state: start_state, page: 0, form: form, starred: starred };
 }
 
 // a copy of obj with the value at path (a list of keys) replaced; only the objects along the path are copied
@@ -49,6 +50,10 @@ export function draft_reducer(draft, action)
         case "set_name":
             return { ...draft, name: action.name };
 
+        // Simple mode: the five answers, kept so generating.js can send them (and send them again on Try again)
+        case "save_answers":
+            return { ...draft, answers: action.answers };
+
         // Simple mode: Skip on the questions screen
         case "skip_questions":
             return new_draft(draft.name, draft.mode, "skipped", blank_form(), {});
@@ -67,6 +72,7 @@ export function draft_reducer(draft, action)
         case "edit_field":
         {
             const keys = action.path.split(".").map((k) => /^\d+$/.test(k) ? Number(k) : k);
+            const old_value = keys.reduce((obj, k) => obj?.[k], draft.form);
             let form = set_path(draft.form, keys, action.value);
 
             // adding stations: reuse removed ones from the cache, and only make new ones past the end of it
@@ -78,22 +84,21 @@ export function draft_reducer(draft, action)
                 form = { ...form, stations: [...form.stations, ...added] };
             }
 
-            // a starred field keeps its star until the user leaves the page
-            let edited = draft.edited_this_visit;
-            if (draft.starred[action.path] && !edited.includes(action.path))
-                edited = [...edited, action.path];
+            // a starred field loses its star as soon as its value actually changes
+            // (choosing the same dropdown option again doesn't count; Object.is so NaN equals NaN)
+            let starred = draft.starred;
+            if (starred[action.path] && !Object.is(old_value, action.value))
+            {
+                starred = { ...starred };
+                delete starred[action.path];
+            }
 
-            return { ...draft, form: form, edited_this_visit: edited };
+            return { ...draft, form: form, starred: starred };
         }
 
         // Next, tapping a progress circle and Back all go through here
         case "go_to_page":
-        {
-            const starred = { ...draft.starred };
-            for (const path of draft.edited_this_visit)
-                delete starred[path];
-            return { ...draft, page: action.page, starred: starred, edited_this_visit: [] };
-        }
+            return { ...draft, page: action.page };
 
         // the simulation finished and the run is saved; the review screens stop blocking Back so they can be closed
         case "finish":
@@ -119,6 +124,7 @@ export function DraftRunProvider({ children })
         begin_run: (name, mode) => dispatch({ type: "begin_run", name: name, mode: mode }),
         begin_duplicate: (mode, schema) => dispatch({ type: "begin_duplicate", mode: mode, schema: schema }),
         set_name: (name) => dispatch({ type: "set_name", name: name }),
+        save_answers: (answers) => dispatch({ type: "save_answers", answers: answers }),
         skip_questions: () => dispatch({ type: "skip_questions" }),
         fill_from_ai: (schema) => dispatch({ type: "fill_from_ai", schema: schema }),
         edit_field: (path, value) => dispatch({ type: "edit_field", path: path, value: value }),
