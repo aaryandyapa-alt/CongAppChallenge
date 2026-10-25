@@ -4,6 +4,7 @@ import { FlatList, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions,
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@react-native-vector-icons/ionicons";
 
+import HomeButton from "../../components/HomeButton.js";
 import { schema_to_form } from "../../lib/form_to_schema.js";
 import { SCENARIOS } from "../../lib/result_sentences.js";
 import ResultsSummaryPage from "../../results/ResultsSummaryPage.js";
@@ -69,9 +70,15 @@ export default function ResultsScreen()
         );
     }
 
+    // right after a run, the setup screens are closed, so "back" would go Home anyway: show that as a home icon.
+    // From a saved run, the normal back arrow returns to it.
+    const header = from === "new"
+        ? { title: name, headerTitleAlign: "center", headerBackVisible: false, headerLeft: () => <HomeButton ask={false} /> }
+        : { title: name, headerTitleAlign: "center" };
+
     return (
         <View style={styles.screen}>
-            <Stack.Screen options={{ title: name }} />
+            <Stack.Screen options={header} />
 
             <FlatList
                 ref={list}

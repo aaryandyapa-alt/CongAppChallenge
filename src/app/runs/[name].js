@@ -79,7 +79,7 @@ export default function SavedRunScreen()
                     {[format_date_time(run.info?.date_run), mode === "pro" ? "Advanced" : "Simple"].filter(Boolean).join("  ·  ")}
                 </Text>
                 {/* the same summary the user saw before simulating; a saved run has no problems to show */}
-                <SummaryPage draft={{ form: form, mode: mode }} errors={{}} station_count={form.stations.length} />
+                <SummaryPage draft={{ form: form, mode: mode }} errors={{}} station_count={form.stations.length} saved />
             </ScrollView>
 
             <View style={[styles.bar, { paddingBottom: 12 + insets.bottom }]}>
