@@ -1,8 +1,13 @@
-import { Redirect, Stack, router } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Redirect, router } from "expo-router";
+import { useState } from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
 
+import BottomBar from "../components/BottomBar.js";
+import GlowBackground from "../components/GlowBackground.js";
 import HomeButton from "../components/HomeButton.js";
+import PrimaryButton from "../components/PrimaryButton.js";
+import { BackButton } from "../components/RoundButton.js";
+import TopBar from "../components/TopBar.js";
 import IntroPage from "../review/IntroPage.js";
 import { useDraftRun } from "../state/DraftRunContext.js";
 import { COLORS } from "../components/theme.js";
@@ -14,7 +19,8 @@ import { COLORS } from "../components/theme.js";
 export default function IntroScreen()
 {
     const { draft } = useDraftRun();
-    const insets = useSafeAreaInsets();
+    // how much of the bottom the floating Continue bar covers; the page gets that much room at its end
+    const [bar_height, set_bar_height] = useState(0);
 
     // opened with no run being set up (for example from a stale link)
     if (draft === null)
@@ -22,23 +28,20 @@ export default function IntroScreen()
 
     return (
         <View style={styles.screen}>
-            <Stack.Screen options={{ headerRight: () => <HomeButton /> }} />
-            <ScrollView contentContainerStyle={styles.body}>
+            <GlowBackground />
+            <TopBar left={<BackButton />} right={<HomeButton />} eyebrow={draft.name} title="Before you start" />
+            <ScrollView contentContainerStyle={[styles.body, { paddingBottom: bar_height + 20 }]}>
                 <IntroPage draft={draft} />
             </ScrollView>
-            <View style={[styles.bar, { paddingBottom: 12 + insets.bottom }]}>
-                <Pressable style={styles.button} onPress={() => router.push("/review")} accessibilityRole="button">
-                    <Text style={styles.button_text}>Continue</Text>
-                </Pressable>
-            </View>
+            <BottomBar on_height={set_bar_height}>
+                <PrimaryButton label="Continue" on_press={() => router.push("/review")} />
+            </BottomBar>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
     screen: { flex: 1, backgroundColor: COLORS.background },
-    body: { padding: 20 },
-    bar: { paddingHorizontal: 20, paddingTop: 12, borderTopWidth: 1, borderTopColor: COLORS.divider, backgroundColor: COLORS.surface },
-    button: { minHeight: 52, borderRadius: 8, backgroundColor: COLORS.accent, alignItems: "center", justifyContent: "center" },
-    button_text: { fontSize: 18, fontWeight: "600", color: COLORS.on_accent },
+    // the bottom padding (room for the floating bar) is added in the component
+    body: { paddingHorizontal: 20, paddingTop: 16 },
 });

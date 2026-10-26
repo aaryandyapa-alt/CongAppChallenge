@@ -1,8 +1,9 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@react-native-vector-icons/ionicons";
 
+import PrimaryButton from "../components/PrimaryButton.js";
 import { measures, SCENARIOS, TITLES } from "../lib/result_sentences.js";
-import { COLORS } from "../components/theme.js";
+import { CARD_SHADOW, COLORS, FONTS, RADIUS } from "../components/theme.js";
 
 /**
  * The last results page: every setup side by side. The app never picks one for the user;
@@ -41,30 +42,31 @@ export default function ResultsSummaryPage({ output, on_jump, on_home })
                             <Text style={styles.row_value}>{shown.line}</Text>
                             {same_as_current ? <Text style={styles.same}>Same as your current setup</Text> : null}
                         </View>
-                        <Ionicons name="chevron-forward" size={22} color={COLORS.text_muted} />
+                        <View style={styles.chevron}>
+                            <Ionicons name="chevron-forward" size={18} color={COLORS.accent_deep} />
+                        </View>
                     </Pressable>
                 );
             })}
 
-            <Pressable style={styles.home} onPress={on_home} accessibilityRole="button">
-                <Ionicons name="home-outline" size={20} color={COLORS.on_accent} />
-                <Text style={styles.home_text}>Back to Home</Text>
-            </Pressable>
+            <PrimaryButton label="Back to Home" icon="home-outline" on_press={on_home} style={styles.home} />
         </>
     );
 }
 
 const styles = StyleSheet.create({
-    title: { fontSize: 24, fontWeight: "700", color: COLORS.text, marginBottom: 8 },
-    intro: { fontSize: 16, lineHeight: 22, color: COLORS.text_secondary, marginBottom: 16 },
+    title: { fontSize: 26, fontFamily: FONTS.extrabold, color: COLORS.text, marginBottom: 8, letterSpacing: -0.5, lineHeight: 32 },
+    intro: { fontFamily: FONTS.regular, fontSize: 16, lineHeight: 23, color: COLORS.text_secondary, marginBottom: 18 },
+    // glass cards
     row: {
-        flexDirection: "row", alignItems: "center", gap: 12, minHeight: 72, padding: 14, marginBottom: 10,
-        borderRadius: 10, borderWidth: 2, borderColor: COLORS.border, backgroundColor: COLORS.surface,
+        flexDirection: "row", alignItems: "center", gap: 12, minHeight: 76, paddingVertical: 14, paddingLeft: 18, paddingRight: 14, marginBottom: 12,
+        borderRadius: RADIUS.card, backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.glass_edge, ...CARD_SHADOW,
     },
     row_text: { flex: 1, gap: 4 },
-    row_title: { fontSize: 18, fontWeight: "600", color: COLORS.text },
-    row_value: { fontSize: 16, color: COLORS.text_secondary },
-    same: { fontSize: 14, color: COLORS.accent },
-    home: { marginTop: 16, minHeight: 52, borderRadius: 8, backgroundColor: COLORS.accent, flexDirection: "row", gap: 8, alignItems: "center", justifyContent: "center" },
-    home_text: { fontSize: 18, fontWeight: "600", color: COLORS.on_accent },
+    row_title: { fontSize: 17, fontFamily: FONTS.bold, color: COLORS.text },
+    row_value: { fontFamily: FONTS.medium, fontSize: 15, color: COLORS.text_secondary },
+    same: { fontFamily: FONTS.semibold, fontSize: 13, color: COLORS.accent_deep },
+    // the arrow sits in a small lime circle, like Home's run rows
+    chevron: { width: 32, height: 32, borderRadius: 16, alignItems: "center", justifyContent: "center", backgroundColor: COLORS.accent_tint },
+    home: { marginTop: 18 },
 });

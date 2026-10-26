@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
-import { COLORS } from "./theme.js";
+import Gradient from "./Gradient.js";
+import { COLORS, CURRENT_GLOW, FONTS } from "./theme.js";
 
 const SIDE_PADDING = 20;
 const VERTICAL_PADDING = 12;
@@ -29,7 +30,7 @@ export default function ProgressCircles({ pages, current, on_jump })
         <View style={[styles.bar, { height: size + 2 * VERTICAL_PADDING }]}>
             {/* the line runs from the first circle's center to the last one's */}
             <View style={[styles.track, { left: SIDE_PADDING + size / 2, right: SIDE_PADDING + size / 2, top: VERTICAL_PADDING + (size - LINE) / 2 }]}>
-                <View style={[styles.fill, { width: `${filled * 100}%` }]} />
+                <Gradient name="button" style={[styles.fill, { width: `${filled * 100}%` }]} />
             </View>
 
             <View style={styles.row}>
@@ -38,6 +39,8 @@ export default function ProgressCircles({ pages, current, on_jump })
                     const is_current = i === current;
                     const is_done = i < current;
                     const status_text = page.status === "error" ? ", has problems" : page.status === "starred" ? ", has values to check" : "";
+                    // red and amber pages always show their color; other pages reached so far are lime, like the bar
+                    const fill = page.status ?? (is_done || is_current ? "button" : null);
                     return (
                         <Pressable
                             key={i}
@@ -46,19 +49,17 @@ export default function ProgressCircles({ pages, current, on_jump })
                             style={[
                                 styles.circle,
                                 { width: size, height: size, borderRadius: size / 2 },
-                                (is_done || is_current) && styles.reached,
-                                is_done && styles.done,
-                                page.status === "starred" && styles.starred,
-                                page.status === "error" && styles.error,
-                                is_current && styles.current,
+                                is_current && CURRENT_GLOW,
                             ]}
                             accessibilityRole="button"
                             accessibilityState={{ selected: is_current }}
                             accessibilityLabel={`Page ${i + 1}: ${page.name}${status_text}`}
                         >
+                            {/* rounded itself rather than clipped by the circle, so the current page's glow isn't cut off */}
+                            {fill ? <Gradient name={fill} style={[StyleSheet.absoluteFill, { borderRadius: size / 2 }]} /> : null}
                             {show_numbers ? (
                                 // the circle has a fixed size, so the number can only grow a little with the phone's text size
-                                <Text style={[styles.number, is_done && !page.status && styles.number_done]} maxFontSizeMultiplier={1.2}>{i + 1}</Text>
+                                <Text style={[styles.number, fill && styles.number_filled]} maxFontSizeMultiplier={1.2}>{i + 1}</Text>
                             ) : null}
                         </Pressable>
                     );
@@ -71,14 +72,10 @@ export default function ProgressCircles({ pages, current, on_jump })
 const styles = StyleSheet.create({
     bar: { justifyContent: "center" },
     track: { position: "absolute", height: LINE, borderRadius: LINE / 2, backgroundColor: COLORS.track },
-    fill: { height: LINE, borderRadius: LINE / 2, backgroundColor: COLORS.accent },
+    fill: { height: LINE, borderRadius: LINE / 2 },
     row: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: SIDE_PADDING },
-    circle: { borderWidth: 2, borderColor: COLORS.border, backgroundColor: COLORS.surface, alignItems: "center", justifyContent: "center" },
-    reached: { borderColor: COLORS.accent },
-    done: { backgroundColor: COLORS.accent },
-    starred: { borderColor: COLORS.starred, backgroundColor: COLORS.starred_light },
-    error: { borderColor: COLORS.error, backgroundColor: COLORS.error_light },
-    current: { borderWidth: 4 },
-    number: { fontSize: 13, fontWeight: "600", color: COLORS.text },
-    number_done: { color: COLORS.on_accent },
+    // no outlines: pages not reached yet are the same color as the empty bar
+    circle: { backgroundColor: COLORS.track, alignItems: "center", justifyContent: "center" },
+    number: { fontSize: 13, fontFamily: FONTS.semibold, color: COLORS.text_muted },
+    number_filled: { color: COLORS.text },
 });

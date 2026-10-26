@@ -5,7 +5,7 @@ import PathDiagram, { variance_text } from "../components/PathDiagram.js";
 import { format_time } from "../components/TimeInput.js";
 import { check_overload } from "../lib/form_checks.js";
 import { total_workers } from "../lib/form_to_schema.js";
-import { COLORS } from "../components/theme.js";
+import { CARD_SHADOW, COLORS, EYEBROW, FONTS, RADIUS } from "../components/theme.js";
 
 // "about 20", or "fewer than 1" for tiny rates
 function about(rate)
@@ -15,6 +15,19 @@ function about(rate)
 
 // blank fields show as a dash; they're also flagged on their own pages
 const or_dash = (v) => v === null || v === undefined || v === "" || Number.isNaN(v) ? "–" : v;
+
+// one line of the facts card
+function Fact({ icon, text })
+{
+    return (
+        <View style={styles.fact_row}>
+            <View style={styles.fact_icon}>
+                <Ionicons name={icon} size={18} color={COLORS.accent_deep} />
+            </View>
+            <Text style={styles.fact}>{text}</Text>
+        </View>
+    );
+}
 
 /**
  * The run at a glance before simulating: hours, arrivals, and the path through the stations.
@@ -38,14 +51,15 @@ export default function SummaryPage({ draft, errors, station_count, saved = fals
 
     return (
         <>
+            {/* the key facts on one glass card, each with a small lime icon */}
             <View style={styles.facts}>
-                <Text style={styles.fact}>Open {or_dash(format_time(basics.open_time))} to {or_dash(format_time(basics.close_time))}</Text>
-                <Text style={styles.fact}>{total === 1 ? "1 worker" : `${or_dash(total)} workers`} in total</Text>
-                <Text style={styles.fact}>About {or_dash(arrivals.per_hour)} arrivals per hour</Text>
+                <Fact icon="time-outline" text={`Open ${or_dash(format_time(basics.open_time))} to ${or_dash(format_time(basics.close_time))}`} />
+                <Fact icon="people-outline" text={`${total === 1 ? "1 worker" : `${or_dash(total)} workers`} in total`} />
+                <Fact icon="walk-outline" text={`About ${or_dash(arrivals.per_hour)} arrivals per hour`} />
                 {arrivals.type === "bursty" ? (
-                    <Text style={styles.fact}>Busiest around {or_dash(format_time(arrivals.peak_time))}</Text>
+                    <Fact icon="trending-up-outline" text={`Busiest around ${or_dash(format_time(arrivals.peak_time))}`} />
                 ) : (
-                    <Text style={styles.fact}>Arrival rate is about the same all day</Text>
+                    <Fact icon="remove-outline" text="Arrival rate is about the same all day" />
                 )}
             </View>
 
@@ -78,13 +92,19 @@ export default function SummaryPage({ draft, errors, station_count, saved = fals
 }
 
 const styles = StyleSheet.create({
-    facts: { gap: 6, marginBottom: 20 },
-    fact: { fontSize: 18, color: COLORS.text },
-    heading: { fontSize: 17, fontWeight: "600", color: COLORS.text },
-    warning: { padding: 14, gap: 6, marginBottom: 20, borderRadius: 10, borderWidth: 2, borderColor: COLORS.starred, backgroundColor: COLORS.starred_light },
-    warning_title: { fontSize: 17, fontWeight: "700", color: COLORS.warning_text },
-    warning_text: { fontSize: 16, lineHeight: 22, color: COLORS.text },
+    // a glass card
+    facts: {
+        padding: 18, gap: 12, marginBottom: 22, borderRadius: RADIUS.panel,
+        backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.glass_edge, ...CARD_SHADOW,
+    },
+    fact_row: { flexDirection: "row", alignItems: "center", gap: 12 },
+    fact_icon: { width: 34, height: 34, borderRadius: 17, alignItems: "center", justifyContent: "center", backgroundColor: COLORS.accent_tint },
+    fact: { flex: 1, fontFamily: FONTS.semibold, fontSize: 16, lineHeight: 22, color: COLORS.text },
+    heading: { ...EYEBROW, paddingHorizontal: 4, marginBottom: 4 },
+    warning: { padding: 18, gap: 6, marginBottom: 22, borderRadius: RADIUS.card, borderWidth: 1.5, borderColor: COLORS.starred, backgroundColor: COLORS.starred_light },
+    warning_title: { fontSize: 17, fontFamily: FONTS.bold, color: COLORS.warning_text },
+    warning_text: { fontFamily: FONTS.regular, fontSize: 16, lineHeight: 22, color: COLORS.text },
     warning_time: { flexDirection: "row", alignItems: "flex-start", gap: 8, marginTop: 4, paddingTop: 10, borderTopWidth: 1, borderTopColor: COLORS.warning_divider },
-    warning_time_text: { flex: 1, fontSize: 16, lineHeight: 22, fontWeight: "700", color: COLORS.warning_text },
-    problems: { marginTop: 20, fontSize: 16, color: COLORS.error },
+    warning_time_text: { flex: 1, fontSize: 16, lineHeight: 22, fontFamily: FONTS.bold, color: COLORS.warning_text },
+    problems: { marginTop: 20, fontFamily: FONTS.regular, fontSize: 16, color: COLORS.error },
 });

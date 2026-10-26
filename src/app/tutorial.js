@@ -4,7 +4,11 @@ import { FlatList, Image, Pressable, StyleSheet, Text, useWindowDimensions, View
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@react-native-vector-icons/ionicons";
 
-import { COLORS } from "../components/theme.js";
+import GlowBackground from "../components/GlowBackground.js";
+import Gradient from "../components/Gradient.js";
+import OutlineButton from "../components/OutlineButton.js";
+import PrimaryButton from "../components/PrimaryButton.js";
+import { COLORS, FONTS } from "../components/theme.js";
 import { check_run_name } from "../lib/form_checks.js";
 import { SAMPLE_NAME, SAMPLE_SCHEMA } from "../lib/sample_run.js";
 import { useDraftRun } from "../state/DraftRunContext.js";
@@ -109,6 +113,7 @@ export default function TutorialScreen()
     return (
         <View style={[styles.screen, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
             <Stack.Screen options={{ headerShown: false }} />
+            <GlowBackground />
 
             <View style={styles.top_bar}>
                 {!is_last ? (
@@ -139,9 +144,9 @@ export default function TutorialScreen()
                                 <Image source={item.image} style={styles.picture} resizeMode="contain" />
                             </View>
                         ) : (
-                            <View style={styles.icon_circle}>
-                                <Ionicons name={item.icon} size={56} color={COLORS.accent} />
-                            </View>
+                            <Gradient name="soft" style={styles.icon_circle}>
+                                <Ionicons name={item.icon} size={56} color={COLORS.accent_text} />
+                            </Gradient>
                         )}
                         <Text style={styles.title}>{item.title}</Text>
                         <Text style={styles.text}>{item.text}</Text>
@@ -158,18 +163,16 @@ export default function TutorialScreen()
             <View style={styles.buttons}>
                 {is_last ? (
                     <>
-                        <Pressable style={styles.primary} onPress={start_own} accessibilityRole="button">
-                            <Text style={styles.primary_text}>Start my own</Text>
-                        </Pressable>
-                        <Pressable style={styles.secondary} onPress={try_sample} accessibilityRole="button" accessibilityHint="Loads an example food bank run, ready to simulate">
-                            <Ionicons name="play-circle-outline" size={20} color={COLORS.accent} />
-                            <Text style={styles.secondary_text}>Try a sample run</Text>
-                        </Pressable>
+                        <PrimaryButton label="Start my own" on_press={start_own} />
+                        <OutlineButton
+                            label="Try a sample run"
+                            icon="play-circle-outline"
+                            on_press={try_sample}
+                            hint="Loads an example food bank run, ready to simulate"
+                        />
                     </>
                 ) : (
-                    <Pressable style={styles.primary} onPress={() => go_to(index + 1)} accessibilityRole="button">
-                        <Text style={styles.primary_text}>Next</Text>
-                    </Pressable>
+                    <PrimaryButton label="Next" on_press={() => go_to(index + 1)} />
                 )}
             </View>
         </View>
@@ -180,20 +183,20 @@ const styles = StyleSheet.create({
     screen: { flex: 1, backgroundColor: COLORS.background },
     // keeps the same height whether or not Skip is showing, so the slides don't jump
     top_bar: { height: 48, paddingHorizontal: 20, alignItems: "flex-end", justifyContent: "center" },
-    skip: { fontSize: 17, fontWeight: "600", color: COLORS.accent },
+    skip: { fontSize: 16, fontFamily: FONTS.bold, color: COLORS.accent_deep },
     slide: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32, gap: 20 },
     // grows to fill the room above the title and text; the picture scales down inside it
     picture_area: { flex: 1, alignSelf: "stretch", minHeight: 160, marginTop: 8 },
     picture: { width: "100%", height: "100%" },
-    icon_circle: { width: 112, height: 112, borderRadius: 56, alignItems: "center", justifyContent: "center", backgroundColor: COLORS.accent_light },
-    title: { fontSize: 26, fontWeight: "700", color: COLORS.text, textAlign: "center" },
-    text: { fontSize: 18, lineHeight: 26, color: COLORS.text_secondary, textAlign: "center" },
+    // with a soft lime glow around it
+    icon_circle: {
+        width: 120, height: 120, borderRadius: 60, alignItems: "center", justifyContent: "center",
+        boxShadow: "0px 0px 0px 10px rgba(127, 212, 106, 0.12)",
+    },
+    title: { fontSize: 28, fontFamily: FONTS.extrabold, color: COLORS.text, textAlign: "center", letterSpacing: -0.6, lineHeight: 34 },
+    text: { fontFamily: FONTS.regular, fontSize: 17, lineHeight: 26, color: COLORS.text_secondary, textAlign: "center" },
     dots: { flexDirection: "row", justifyContent: "center", gap: 8, paddingVertical: 16 },
     dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.track },
     dot_current: { width: 22, backgroundColor: COLORS.accent },
     buttons: { paddingHorizontal: 20, paddingBottom: 16, gap: 10 },
-    primary: { minHeight: 52, borderRadius: 8, backgroundColor: COLORS.accent, alignItems: "center", justifyContent: "center" },
-    primary_text: { fontSize: 18, fontWeight: "600", color: COLORS.on_accent },
-    secondary: { minHeight: 52, borderRadius: 8, borderWidth: 2, borderColor: COLORS.accent, flexDirection: "row", gap: 8, alignItems: "center", justifyContent: "center", backgroundColor: COLORS.surface },
-    secondary_text: { fontSize: 18, fontWeight: "600", color: COLORS.accent },
 });

@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 
 import { STARRED_BOX, StarredContext } from "./StarredField.js";
-import { COLORS } from "./theme.js";
+import { COLORS, FONTS, RADIUS } from "./theme.js";
 
 // "" and "." mean the field is blank
 function parse(text)
@@ -70,11 +70,11 @@ export default function NumberInput({ value, on_change, whole = false, suffix, h
 const styles = StyleSheet.create({
     row: { flexDirection: "row", alignItems: "center", gap: 8 },
     box: {
-        minWidth: 72, minHeight: 48, paddingHorizontal: 12,
-        borderWidth: 2, borderColor: COLORS.border, borderRadius: 8,
-        fontSize: 18, color: COLORS.text, textAlign: "center", backgroundColor: COLORS.surface,
+        minWidth: 76, minHeight: 50, paddingHorizontal: 12,
+        borderWidth: 1.5, borderColor: COLORS.border, borderRadius: RADIUS.input,
+        fontFamily: FONTS.regular, fontSize: 18, color: COLORS.text, textAlign: "center", backgroundColor: COLORS.surface,
     },
     // only the color changes: changing the border width while typing made some phones re-select the text
     box_error: { borderColor: COLORS.error },
-    suffix: { fontSize: 16, color: COLORS.text_muted },
+    suffix: { fontFamily: FONTS.regular, fontSize: 16, color: COLORS.text_muted },
 });

@@ -1,11 +1,13 @@
 import { Redirect, Stack, router, usePreventRemove } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
+import GlowBackground from "../components/GlowBackground.js";
 import LoadingScreen from "../components/LoadingScreen.js";
+import PrimaryButton from "../components/PrimaryButton.js";
 import start_run from "../lib/start_run.js";
 import { useDraftRun } from "../state/DraftRunContext.js";
-import { COLORS } from "../components/theme.js";
+import { CARD_SHADOW, COLORS, FONTS, RADIUS } from "../components/theme.js";
 
 // what each optimizer stage is shown as (see run_optimizer_steps in optimization.js)
 const TUNING_DETAIL = "Moving one worker at a time to see if it helps";
@@ -109,13 +111,13 @@ export default function SimulatingScreen()
     {
         return (
             <View style={styles.error_screen}>
-                <Stack.Screen options={{ title: "Something went wrong" }} />
-                <Text style={styles.error_title}>The simulation couldn&apos;t run</Text>
-                <Text style={styles.error_text}>Nothing was saved. Go back to check your answers, then try again.</Text>
-                <Text style={styles.error_detail}>{error}</Text>
-                <Pressable style={styles.button} onPress={() => router.back()} accessibilityRole="button">
-                    <Text style={styles.button_text}>Back to review</Text>
-                </Pressable>
+                <GlowBackground />
+                <View style={styles.error_card}>
+                    <Text style={styles.error_title}>The simulation couldn&apos;t run</Text>
+                    <Text style={styles.error_text}>Nothing was saved. Go back to check your answers, then try again.</Text>
+                    <Text style={styles.error_detail}>{error}</Text>
+                    <PrimaryButton label="Back to review" on_press={() => router.back()} style={styles.button} />
+                </View>
             </View>
         );
     }
@@ -126,8 +128,8 @@ export default function SimulatingScreen()
 
     return (
         <>
-            {/* no back arrow or swipe while it runs */}
-            <Stack.Screen options={{ headerBackVisible: false, gestureEnabled: false }} />
+            {/* no title bar, back button or swipe while it runs */}
+            <Stack.Screen options={{ gestureEnabled: false }} />
             <LoadingScreen
                 message="Simulating"
                 progress={update?.fraction ?? 0}
@@ -141,10 +143,14 @@ export default function SimulatingScreen()
 }
 
 const styles = StyleSheet.create({
-    error_screen: { flex: 1, padding: 24, gap: 14, justifyContent: "center", backgroundColor: COLORS.background },
-    error_title: { fontSize: 22, fontWeight: "600", color: COLORS.text },
-    error_text: { fontSize: 17, lineHeight: 24, color: COLORS.text },
-    error_detail: { fontSize: 13, color: COLORS.text_detail },
-    button: { marginTop: 12, minHeight: 52, borderRadius: 8, backgroundColor: COLORS.accent, alignItems: "center", justifyContent: "center" },
-    button_text: { fontSize: 18, fontWeight: "600", color: COLORS.on_accent },
+    error_screen: { flex: 1, padding: 20, justifyContent: "center", backgroundColor: COLORS.background },
+    // a glass card, like the loading card it replaces
+    error_card: {
+        padding: 24, gap: 14, borderRadius: RADIUS.panel,
+        backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.glass_edge, ...CARD_SHADOW,
+    },
+    error_title: { fontSize: 24, fontFamily: FONTS.extrabold, color: COLORS.text, letterSpacing: -0.4 },
+    error_text: { fontFamily: FONTS.regular, fontSize: 17, lineHeight: 24, color: COLORS.text },
+    error_detail: { fontFamily: FONTS.regular, fontSize: 13, color: COLORS.text_detail },
+    button: { marginTop: 12 },
 });

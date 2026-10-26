@@ -1,5 +1,5 @@
-import { StyleSheet, Text } from "react-native";
-import { COLORS } from "../components/theme.js";
+import { StyleSheet, Text, View } from "react-native";
+import { CARD_SHADOW, COLORS, EYEBROW, FONTS, RADIUS } from "../components/theme.js";
 
 const HOW_TO = "Next, you'll go through a few pages describing how your site runs. Tap Next to move through them, or tap a circle on the progress bar to jump to one.";
 
@@ -14,19 +14,27 @@ const MESSAGES = {
 };
 
 /**
- * The message shown before the review pages. Used by src/app/intro.js, which has the Continue button.
+ * The message shown before the review pages, on a glass card. Used by src/app/intro.js, which has the Continue button.
  */
 export default function IntroPage({ draft })
 {
     return (
-        <>
+        <View style={styles.card}>
             <Text style={styles.message}>{MESSAGES[draft.start_state] ?? MESSAGES["skipped"]}</Text>
+            <View style={styles.divider} />
+            <Text style={styles.eyebrow}>How it works</Text>
             <Text style={styles.how_to}>{HOW_TO}</Text>
-        </>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
-    message: { fontSize: 20, lineHeight: 28, color: COLORS.text, marginTop: 24, marginBottom: 16 },
-    how_to: { fontSize: 16, lineHeight: 22, color: COLORS.text_muted },
+    card: {
+        padding: 22, gap: 12, borderRadius: RADIUS.panel,
+        backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.glass_edge, ...CARD_SHADOW,
+    },
+    message: { fontFamily: FONTS.semibold, fontSize: 19, lineHeight: 28, color: COLORS.text },
+    divider: { height: 1, backgroundColor: COLORS.divider, marginVertical: 4 },
+    eyebrow: { ...EYEBROW },
+    how_to: { fontFamily: FONTS.regular, fontSize: 16, lineHeight: 24, color: COLORS.text_muted },
 });

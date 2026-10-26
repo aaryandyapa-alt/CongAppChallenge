@@ -27,7 +27,13 @@
     "plugins": [
       "expo-router",
       "@react-native-vector-icons/ionicons",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FAFCF4"
+        }
+      ]
     ],
     "extra": {
       "router": {
