@@ -43,3 +43,6 @@ yarn-error.*
 # # claude
 # .claude/
 # AGENTS.md
+
+assets/png/
+assets/svg/

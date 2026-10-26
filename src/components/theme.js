@@ -155,6 +155,7 @@ export const GRADIENT_END = { x: 1, y: 1 };
  *   CURRENT_GLOW  - around the current page's circle on the review progress bar
  *   STARRED_BOX   - box colors for a field the AI couldn't fill (amber)
  *   GLOWS         - the radial gradients behind every screen (components/GlowBackground.js)
+ *   TAB_BAR_GLOW  - the soft lime glow around the floating tab bar
  *   GRADIENTS     - the linear gradients used through components/Gradient.js
  * boxShadow ("x y blur spread color") draws the same on Android and iOS.
  */
@@ -187,6 +188,11 @@ function make_theme(name, colors, shadow_color, shadow_strength, glow_strength, 
             `radial-gradient(circle at 100% 8%, rgba(105, 213, 175, ${glow(0.20)}) 0%, rgba(105, 213, 175, 0) 50%)`,
             `radial-gradient(circle at 100% 100%, rgba(163, 229, 143, ${glow(0.16)}) 0%, rgba(163, 229, 143, 0) 50%)`,
         ],
+        // around the floating tab bar: one soft lime glow, centered so it's even above and below, to set it apart
+        // from what's around it
+        TAB_BAR_GLOW: {
+            boxShadow: `0px 0px 24px 0px rgba(95, 163, 78, ${name === "dark" ? 0.15 : 0.26})`,
+        },
         GRADIENTS: gradients,
     };
 }

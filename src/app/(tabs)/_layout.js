@@ -23,7 +23,7 @@ function TabIcon({ name, focused, color })
 
 export default function TabsLayout()
 {
-    const { COLORS, PANEL_SHADOW } = useTheme();
+    const { COLORS, TAB_BAR_GLOW } = useTheme();
     const insets = useSafeAreaInsets();
 
     return (
@@ -39,7 +39,8 @@ export default function TabsLayout()
                     height: TAB_BAR.height, paddingTop: 0, paddingBottom: 0,
                     borderTopWidth: 0, borderRadius: RADIUS.pill, elevation: 0,
                     backgroundColor: COLORS.background,
-                    ...PANEL_SHADOW,
+                    // a soft lime glow around it, even on every side, setting it apart from the content scrolling underneath
+                    ...TAB_BAR_GLOW,
                 },
                 // the active tab is ink with a filled icon in a lime pill; the others are slate outlines
                 tabBarActiveTintColor: COLORS.text,

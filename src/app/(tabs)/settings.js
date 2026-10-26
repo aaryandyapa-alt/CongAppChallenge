@@ -8,6 +8,7 @@ import BrandHeader from "../../components/BrandHeader.js";
 import ConfirmDialog from "../../components/ConfirmDialog.js";
 import GlowBackground from "../../components/GlowBackground.js";
 import Gradient from "../../components/Gradient.js";
+import Logo from "../../components/Logo.js";
 import OutlineButton from "../../components/OutlineButton.js";
 import ToggleSwitch from "../../components/ToggleSwitch.js";
 import { DEV_PRESETS } from "../../lib/dev_presets.js";
@@ -126,6 +127,8 @@ export default function SettingsScreen()
 
                 <Text style={styles.heading}>About</Text>
                 <View style={styles.card}>
+                    {/* the full-color logo (its on-dark version in dark mode) */}
+                    <Logo height={44} style={styles.about_logo} />
                     <Text style={styles.about}>
                         ShiftLime is a queue planner for food banks, pantries and clinics. Describe how people move through your site, and it tests every way to split your workers to show which works better.
                     </Text>
@@ -202,6 +205,7 @@ const make_styles = ({ COLORS, EYEBROW, CARD_SHADOW }) => StyleSheet.create({
         backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.glass_edge, ...CARD_SHADOW,
     },
     about: { fontFamily: FONTS.regular, fontSize: 16, lineHeight: 23, color: COLORS.text },
+    about_logo: { marginBottom: 4 },
     replay: { marginTop: 4 },
     setting_row: { flexDirection: "row", alignItems: "center", gap: 12 },
     setting_text: { flex: 1, gap: 4 },

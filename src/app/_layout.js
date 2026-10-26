@@ -6,10 +6,11 @@ import { PlusJakartaSans_600SemiBold } from "@expo-google-fonts/plus-jakarta-san
 import { PlusJakartaSans_700Bold } from "@expo-google-fonts/plus-jakarta-sans/700Bold";
 import { PlusJakartaSans_800ExtraBold } from "@expo-google-fonts/plus-jakarta-sans/800ExtraBold";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider, Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
+import * as SystemUI from "expo-system-ui";
+import { useEffect, useMemo } from "react";
 
 import { DraftRunProvider } from "../state/DraftRunContext.js";
 import { SettingsProvider } from "../state/SettingsContext.js";
@@ -23,8 +24,24 @@ function AppStack()
 {
     const { COLORS, dark } = useTheme();
 
+    // The navigator has its own theme, whose white background showed for a moment between screens (a white flash
+    // in dark mode). Give it the page color, and the phone's window behind the app too.
+    const navigation_theme = useMemo(() =>
+    {
+        const base = dark ? DarkTheme : DefaultTheme;
+        return {
+            ...base,
+            colors: { ...base.colors, background: COLORS.background, card: COLORS.background, text: COLORS.text, border: COLORS.divider, primary: COLORS.accent_text },
+        };
+    }, [COLORS, dark]);
+
+    useEffect(() =>
+    {
+        SystemUI.setBackgroundColorAsync(COLORS.background);
+    }, [COLORS]);
+
     return (
-        <>
+        <NavigationThemeProvider value={navigation_theme}>
             {/* light status bar icons on the dark theme, dark ones on the light theme */}
             <StatusBar style={dark ? "light" : "dark"} />
             {/* no header bars: each screen draws its own top (TopBar, BrandHeader, or Review's top),
@@ -36,7 +53,7 @@ function AppStack()
                     contentStyle: { backgroundColor: COLORS.background },
                 }}
             />
-        </>
+        </NavigationThemeProvider>
     );
 }
 

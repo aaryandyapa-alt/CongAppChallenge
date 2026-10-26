@@ -6,6 +6,7 @@ import { Ionicons } from "@react-native-vector-icons/ionicons";
 
 import GlowBackground from "../components/GlowBackground.js";
 import Gradient from "../components/Gradient.js";
+import { Mark } from "../components/Logo.js";
 import OutlineButton from "../components/OutlineButton.js";
 import PrimaryButton from "../components/PrimaryButton.js";
 import { FONTS } from "../components/theme.js";
@@ -22,12 +23,13 @@ import { useTheme, useThemedStyles } from "../components/ThemeContext.js";
  *   1. put the image in assets/tutorial/, e.g. assets/tutorial/check-details.png
  *   2. set image: require("../../assets/tutorial/check-details.png") on that slide
  *   3. set image_label to a short description for screen readers, e.g. "A review page with a starred field"
- * Slides with image: null keep their icon.
+ * Slides with image: null keep their icon; mark: true shows the ShiftLime clock instead, at the same size.
  */
 const SLIDES = [
     {
         image: null,
         image_label: null,
+        mark: true,
         icon: "people-outline",
         title: "Welcome to ShiftLime",
         text: "Plan your queue before the rush. Describe how people move through your site, and ShiftLime tests every way to split your workers.",
@@ -146,6 +148,8 @@ export default function TutorialScreen()
                             <View style={styles.picture_area}>
                                 <Image source={item.image} style={styles.picture} resizeMode="contain" />
                             </View>
+                        ) : item.mark ? (
+                            <Mark size={150} />
                         ) : (
                             <Gradient name="soft" style={styles.icon_circle}>
                                 <Ionicons name={item.icon} size={56} color={COLORS.accent_text} />

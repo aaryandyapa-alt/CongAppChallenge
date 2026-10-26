@@ -5,6 +5,7 @@ import { Ionicons } from "@react-native-vector-icons/ionicons";
 
 import BottomBar from "../../components/BottomBar.js";
 import GlowBackground from "../../components/GlowBackground.js";
+import PageScrubber from "../../components/PageScrubber.js";
 import Gradient from "../../components/Gradient.js";
 import HomeButton from "../../components/HomeButton.js";
 import { BackButton } from "../../components/RoundButton.js";
@@ -138,17 +139,19 @@ export default function ResultsScreen()
                 </>
             ) : null}
 
-            {/* a floating white bar across the bottom: a dot per page (the current one long and lime) and "2 of 5" */}
+            {/* a floating bar across the bottom: a dot per page (the current one long and lime) and "2 of 5".
+                Like the iPhone home screen's dots, dragging sideways anywhere on it moves through the pages */}
             <BottomBar style={styles.footer} on_height={set_bar_height}>
-                <View style={styles.dots}>
-                    {PAGES.map((p, i) => <View key={p} style={[styles.dot, i === index && styles.dot_current]} />)}
-                </View>
-                <Text style={styles.footer_text} accessibilityLiveRegion="polite">{index + 1} of {PAGES.length}</Text>
-                {/* how long the simulation took (saved in run_info.json), with Settings > Developer > Show timings on;
-                    runs saved before timings were kept have none */}
-                {settings["show_timings"] && typeof run.info?.simulation_seconds === "number" ? (
-                    <Text style={styles.took}>Simulation took {run.info.simulation_seconds.toFixed(1)} s</Text>
-                ) : null}
+                <PageScrubber count={PAGES.length} current={index} on_change={go_to}>
+                    <View style={styles.footer_lines}>
+                        <Text style={styles.footer_text} accessibilityLiveRegion="polite">{index + 1} of {PAGES.length}</Text>
+                        {/* how long the simulation took (saved in run_info.json), with Settings > Developer > Show timings on;
+                            runs saved before timings were kept have none */}
+                        {settings["show_timings"] && typeof run.info?.simulation_seconds === "number" ? (
+                            <Text style={styles.took}>Simulation took {run.info.simulation_seconds.toFixed(1)} s</Text>
+                        ) : null}
+                    </View>
+                </PageScrubber>
             </BottomBar>
         </View>
     );
@@ -172,13 +175,12 @@ const make_styles = ({ COLORS, CARD_SHADOW }) => StyleSheet.create({
     arrow_left: { left: 8 },
     arrow_right: { right: 8 },
     arrow_off: { opacity: 0.3 },
-    // as wide as the screen (less the bar's side gaps), like the other screens' bottom bars
-    footer: { alignItems: "center", gap: 6, paddingVertical: 12 },
-    dots: { flexDirection: "row", gap: 6 },
-    dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: COLORS.track },
-    dot_current: { width: 22, backgroundColor: COLORS.accent },
+    // as wide as the screen (less the bar's side gaps), like the other screens' bottom bars; its whole width can be
+    // dragged (the dots come from PageScrubber)
+    footer: { paddingVertical: 12 },
+    footer_lines: { alignItems: "center", gap: 2 },
     footer_text: { fontFamily: FONTS.semibold, fontSize: 13, color: COLORS.text_muted },
-    took: { fontFamily: FONTS.regular, fontSize: 12, color: COLORS.text_tiny, marginTop: 2 },
+    took: { fontFamily: FONTS.regular, fontSize: 12, color: COLORS.text_tiny },
     missing: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24 },
     missing_text: { fontFamily: FONTS.regular, fontSize: 17, color: COLORS.text, textAlign: "center" },
 });
