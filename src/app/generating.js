@@ -78,6 +78,7 @@ export default function GeneratingScreen()
                         />
                         <OutlineButton
                             label="Fill in myself"
+                            on_card
                             on_press={() =>
                             {
                                 // the same as Skip: every page starts blank

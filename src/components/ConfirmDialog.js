@@ -44,7 +44,7 @@ export default function ConfirmDialog({ visible, icon, title, message, cancel_la
 
                     <View style={styles.buttons}>
                         <PrimaryButton label={cancel_label} on_press={on_cancel} />
-                        {confirm_label ? <OutlineButton label={confirm_label} on_press={on_confirm} danger /> : null}
+                        {confirm_label ? <OutlineButton label={confirm_label} on_press={on_confirm} danger on_card /> : null}
                     </View>
                 </View>
             </View>

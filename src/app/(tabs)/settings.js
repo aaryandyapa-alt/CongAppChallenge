@@ -133,7 +133,12 @@ export default function SettingsScreen()
                         ShiftLime is a queue planner for food banks, pantries and clinics. Describe how people move through your site, and it tests every way to split your workers to show which works better.
                     </Text>
                     <Text style={styles.about}>Built for the Congressional App Challenge.</Text>
-                    <OutlineButton label="Replay tutorial" icon="play-circle-outline" on_press={() => router.push("/tutorial")} compact style={styles.replay} />
+                    <View style={styles.divider} />
+                    <Text style={styles.setting_label}>Privacy</Text>
+                    <Text style={styles.setting_note}>
+                        Your runs are saved only on this phone. In Simple mode, your answers to the five questions are sent to Claude, an AI made by Anthropic, to fill in the details. Nothing else leaves your phone.
+                    </Text>
+                    <OutlineButton label="Replay tutorial" icon="play-circle-outline" on_press={() => router.push("/tutorial")} compact on_card style={styles.replay} />
                 </View>
 
                 <Text style={styles.heading}>Saved runs</Text>
@@ -162,7 +167,7 @@ export default function SettingsScreen()
                         <View style={styles.divider} />
                         <Text style={styles.dev_note}>Load a test run on its Summary page, then tap Start simulation.</Text>
                         {DEV_PRESETS.map((p) => (
-                            <OutlineButton key={p.short} label={p.label} on_press={() => load_preset(p)} compact />
+                            <OutlineButton key={p.short} label={p.label} on_press={() => load_preset(p)} compact on_card />
                         ))}
                     </View>
                 ) : null}

@@ -7,6 +7,7 @@ import { Ionicons } from "@react-native-vector-icons/ionicons";
 import BrandHeader from "../../components/BrandHeader.js";
 import GlowBackground from "../../components/GlowBackground.js";
 import Gradient from "../../components/Gradient.js";
+import { Mark } from "../../components/Logo.js";
 import { format_date_time } from "../../components/TimeInput.js";
 import { useSettings } from "../../state/SettingsContext.js";
 import { list_runs, load_info } from "../../storage.js";
@@ -99,8 +100,15 @@ export default function HomeScreen()
             <GlowBackground />
             <BrandHeader />
             {runs !== null && runs.length === 0 ? (
-                <View style={styles.empty}>
-                    <Text style={styles.empty_text}>No runs yet. Tap New to set up your first one.</Text>
+                // the first time: the ShiftLime clock in a soft lime glow, and a pointer to the New button.
+                // Kept clear of the floating tab bar and the New button at the bottom
+                <View style={[styles.empty, { paddingBottom: above_tab_bar + 72 }]}>
+                    <View style={styles.empty_mark}>
+                        <Mark size={96} />
+                    </View>
+                    <Text style={styles.empty_eyebrow}>Welcome</Text>
+                    <Text style={styles.empty_title}>No runs yet</Text>
+                    <Text style={styles.empty_text}>Tap New to describe your site and find the best way to split your workers.</Text>
                 </View>
             ) : (
                 <>
@@ -176,8 +184,15 @@ const make_styles = ({ COLORS, EYEBROW, CARD_SHADOW, FLOATING_SHADOW }) => Style
     row_detail: { fontFamily: FONTS.medium, fontSize: 14, color: COLORS.text_muted },
     // the arrow sits in a small lime circle
     chevron: { width: 32, height: 32, borderRadius: 16, alignItems: "center", justifyContent: "center", backgroundColor: COLORS.accent_tint },
-    empty: { flex: 1, alignItems: "center", justifyContent: "center", padding: 32 },
-    empty_text: { fontFamily: FONTS.regular, fontSize: 18, lineHeight: 26, color: COLORS.text_secondary, textAlign: "center" },
+    empty: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 36, paddingTop: 24 },
+    // the mark sits in a soft lime circle that glows a little past its edge
+    empty_mark: {
+        width: 140, height: 140, borderRadius: 70, alignItems: "center", justifyContent: "center", marginBottom: 22,
+        backgroundColor: COLORS.accent_tint, boxShadow: "0px 0px 0px 12px rgba(127, 212, 106, 0.08)",
+    },
+    empty_eyebrow: { ...EYEBROW, marginBottom: 6 },
+    empty_title: { fontSize: 26, fontFamily: FONTS.extrabold, color: COLORS.text, letterSpacing: -0.5, marginBottom: 8 },
+    empty_text: { fontFamily: FONTS.regular, fontSize: 16, lineHeight: 23, color: COLORS.text_secondary, textAlign: "center" },
     new: { position: "absolute", right: 20, borderRadius: RADIUS.pill, ...FLOATING_SHADOW },
     new_pressed: { opacity: 0.9, transform: [{ scale: 0.98 }] },
     new_fill: { minHeight: 56, paddingHorizontal: 22, borderRadius: RADIUS.pill, overflow: "hidden", flexDirection: "row", alignItems: "center", gap: 6 },

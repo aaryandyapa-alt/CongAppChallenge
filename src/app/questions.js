@@ -1,6 +1,7 @@
 import { Redirect, router } from "expo-router";
 import { useState } from "react";
 import { KeyboardAvoidingView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Ionicons } from "@react-native-vector-icons/ionicons";
 
 import BottomBar from "../components/BottomBar.js";
 import GlowBackground from "../components/GlowBackground.js";
@@ -13,7 +14,7 @@ import { QUESTIONS } from "../lib/ai_client.js";
 import { useDraftRun } from "../state/DraftRunContext.js";
 import { useSettings } from "../state/SettingsContext.js";
 import { FONTS, RADIUS } from "../components/theme.js";
-import { useThemedStyles } from "../components/ThemeContext.js";
+import { useTheme, useThemedStyles } from "../components/ThemeContext.js";
 
 /**
  * Simple mode: the five questions on one scrolling screen, answered in the user's own words.
@@ -21,6 +22,7 @@ import { useThemedStyles } from "../components/ThemeContext.js";
  */
 export default function QuestionsScreen()
 {
+    const { COLORS } = useTheme();
     const styles = useThemedStyles(make_styles);
     const { draft, save_answers, skip_questions } = useDraftRun();
     const { settings } = useSettings();
@@ -76,6 +78,13 @@ export default function QuestionsScreen()
                             Answer in your own words. We&apos;ll use your answers to fill in the details, and you&apos;ll check them next.
                             Only the first question is needed.
                         </Text>
+                        {/* where the answers go, right before they're sent (only these answers ever leave the phone) */}
+                        <View style={styles.privacy}>
+                            <Ionicons name="lock-closed-outline" size={16} color={COLORS.accent_deep} />
+                            <Text style={styles.privacy_text}>
+                                Your answers are sent to Claude, an AI made by Anthropic, to fill in the details. Please don&apos;t include names or other personal information.
+                            </Text>
+                        </View>
 
                         {QUESTIONS.map((q, i) => (
                             <View key={q.key} style={styles.question}>
@@ -108,7 +117,13 @@ const make_styles = ({ COLORS }) => StyleSheet.create({
     fill: { flex: 1 },
     // the bottom padding (room for the floating bar) is added in the component
     body: { paddingHorizontal: 20, paddingTop: 8 },
-    intro: { fontFamily: FONTS.regular, fontSize: 16, lineHeight: 22, color: COLORS.text_secondary, marginBottom: 20 },
+    intro: { fontFamily: FONTS.regular, fontSize: 16, lineHeight: 22, color: COLORS.text_secondary, marginBottom: 14 },
+    // a soft lime note with a lock, like the AI reminder chip
+    privacy: {
+        flexDirection: "row", alignItems: "flex-start", gap: 10, marginBottom: 22,
+        paddingHorizontal: 14, paddingVertical: 12, borderRadius: RADIUS.card, backgroundColor: COLORS.accent_tint,
+    },
+    privacy_text: { flex: 1, fontFamily: FONTS.regular, fontSize: 14, lineHeight: 20, color: COLORS.text_muted },
     question: { marginBottom: 22, gap: 8 },
     question_text: { fontSize: 17, lineHeight: 24, fontFamily: FONTS.bold, color: COLORS.text },
     box: {
