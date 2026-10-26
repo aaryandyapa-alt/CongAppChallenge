@@ -1,6 +1,7 @@
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { COLORS, PANEL_SHADOW, RADIUS } from "./theme.js";
+import { RADIUS } from "./theme.js";
+import { useThemedStyles } from "./ThemeContext.js";
 
 const SIDE = 12;
 
@@ -15,6 +16,7 @@ const SIDE = 12;
  */
 export default function BottomBar({ on_height, style, children })
 {
+    const styles = useThemedStyles(make_styles);
     const insets = useSafeAreaInsets();
     const bottom = Math.max(insets.bottom, 12);
 
@@ -28,7 +30,7 @@ export default function BottomBar({ on_height, style, children })
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS, PANEL_SHADOW }) => StyleSheet.create({
     bar: {
         position: "absolute", left: SIDE, right: SIDE, padding: 12, gap: 10,
         // solid cream (the page's own color, like the tab bar), so the page doesn't show through as it scrolls under

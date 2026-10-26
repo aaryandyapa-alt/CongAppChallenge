@@ -11,7 +11,8 @@ import { check_run_name } from "../lib/form_checks.js";
 import { useKeyboardHeight } from "../lib/keyboard.js";
 import { useDraftRun } from "../state/DraftRunContext.js";
 import { list_runs } from "../storage.js";
-import { CENTERED_TEXT, COLORS, EYEBROW, FONTS, RADIUS } from "../components/theme.js";
+import { CENTERED_TEXT, FONTS, RADIUS } from "../components/theme.js";
+import { useTheme, useThemedStyles } from "../components/ThemeContext.js";
 
 // the second mode is shown as "Advanced" but stored as "pro" (in the draft and run_info.json), so older saved runs still work
 const MODES = [
@@ -28,6 +29,8 @@ const PAGE_BOTTOM = 40;
  */
 export default function NewRunScreen()
 {
+    const { COLORS } = useTheme();
+    const styles = useThemedStyles(make_styles);
     const { duplicate } = useLocalSearchParams();
     const is_duplicate = duplicate === "1";
     const { draft, begin_run, set_name } = useDraftRun();
@@ -77,6 +80,7 @@ export default function NewRunScreen()
             >
                 <TextInput
                     style={[styles.name_box, show_error && name_error && styles.name_box_error]}
+                    placeholderTextColor={COLORS.placeholder}
                     value={name}
                     onChangeText={(text) =>
                     {
@@ -125,7 +129,7 @@ export default function NewRunScreen()
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS, EYEBROW }) => StyleSheet.create({
     screen: { flex: 1, backgroundColor: COLORS.background },
     page: { paddingHorizontal: 20, paddingTop: 16, gap: 12 },
     // small uppercase section label

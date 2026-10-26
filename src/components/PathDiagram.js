@@ -2,7 +2,8 @@ import { StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@react-native-vector-icons/ionicons";
 
 import { VARIANCE_OPTIONS } from "./LevelPicker.js";
-import { CARD_SHADOW, COLORS, FONTS, RADIUS } from "./theme.js";
+import { FONTS, RADIUS } from "./theme.js";
+import { useTheme, useThemedStyles } from "./ThemeContext.js";
 
 /**
  * The path every person takes: stations as boxes, top to bottom in visiting order, joined by arrows.
@@ -16,6 +17,8 @@ import { CARD_SHADOW, COLORS, FONTS, RADIUS } from "./theme.js";
  */
 export default function PathDiagram({ stations })
 {
+    const { COLORS } = useTheme();
+    const styles = useThemedStyles(make_styles);
     return (
         <View style={styles.column}>
             {stations.map((s, i) => (
@@ -78,7 +81,7 @@ export function variance_text(station, pro)
     return VARIANCE_OPTIONS.find((o) => o.value === station.variance_level)?.label ?? "–";
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS, CARD_SHADOW }) => StyleSheet.create({
     column: { paddingVertical: 8 },
     step: { alignItems: "stretch" },
     arrow: { alignSelf: "center", marginVertical: 4 },

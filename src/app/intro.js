@@ -10,7 +10,7 @@ import { BackButton } from "../components/RoundButton.js";
 import TopBar from "../components/TopBar.js";
 import IntroPage from "../review/IntroPage.js";
 import { useDraftRun } from "../state/DraftRunContext.js";
-import { COLORS } from "../components/theme.js";
+import { useThemedStyles } from "../components/ThemeContext.js";
 
 /**
  * The screen between starting a run (New run, the questions, or Duplicate) and the review pages.
@@ -18,6 +18,7 @@ import { COLORS } from "../components/theme.js";
  */
 export default function IntroScreen()
 {
+    const styles = useThemedStyles(make_styles);
     const { draft } = useDraftRun();
     // how much of the bottom the floating Continue bar covers; the page gets that much room at its end
     const [bar_height, set_bar_height] = useState(0);
@@ -40,7 +41,7 @@ export default function IntroScreen()
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS }) => StyleSheet.create({
     screen: { flex: 1, backgroundColor: COLORS.background },
     // the bottom padding (room for the floating bar) is added in the component
     body: { paddingHorizontal: 20, paddingTop: 16 },

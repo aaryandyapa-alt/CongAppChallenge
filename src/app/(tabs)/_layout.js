@@ -3,7 +3,8 @@ import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@react-native-vector-icons/ionicons";
 
-import { COLORS, PANEL_SHADOW, RADIUS, TAB_BAR } from "../../components/theme.js";
+import { RADIUS, TAB_BAR } from "../../components/theme.js";
+import { useTheme, useThemedStyles } from "../../components/ThemeContext.js";
 
 // a bit bigger than the default (about 25), since the tabs have no labels
 const ICON_SIZE = 28;
@@ -12,6 +13,7 @@ const PILL = { width: 60, height: 42 };
 // a tab's icon; the active one is filled and sits in a soft lime pill
 function TabIcon({ name, focused, color })
 {
+    const styles = useThemedStyles(make_styles);
     return (
         <View style={[styles.pill, focused && styles.pill_active]}>
             <Ionicons name={focused ? name : `${name}-outline`} color={color} size={ICON_SIZE} />
@@ -21,6 +23,7 @@ function TabIcon({ name, focused, color })
 
 export default function TabsLayout()
 {
+    const { COLORS, PANEL_SHADOW } = useTheme();
     const insets = useSafeAreaInsets();
 
     return (
@@ -84,7 +87,7 @@ export default function TabsLayout()
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS }) => StyleSheet.create({
     pill: { ...PILL, borderRadius: PILL.height / 2, alignItems: "center", justifyContent: "center" },
     pill_active: { backgroundColor: COLORS.accent_tint_strong },
 });

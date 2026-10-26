@@ -12,7 +12,8 @@ import TopBar from "../components/TopBar.js";
 import { QUESTIONS } from "../lib/ai_client.js";
 import { useDraftRun } from "../state/DraftRunContext.js";
 import { useSettings } from "../state/SettingsContext.js";
-import { COLORS, FONTS, RADIUS } from "../components/theme.js";
+import { FONTS, RADIUS } from "../components/theme.js";
+import { useThemedStyles } from "../components/ThemeContext.js";
 
 /**
  * Simple mode: the five questions on one scrolling screen, answered in the user's own words.
@@ -20,6 +21,7 @@ import { COLORS, FONTS, RADIUS } from "../components/theme.js";
  */
 export default function QuestionsScreen()
 {
+    const styles = useThemedStyles(make_styles);
     const { draft, save_answers, skip_questions } = useDraftRun();
     const { settings } = useSettings();
     // start from earlier answers if the user came back from a later screen
@@ -101,7 +103,7 @@ export default function QuestionsScreen()
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS }) => StyleSheet.create({
     screen: { flex: 1, backgroundColor: COLORS.background },
     fill: { flex: 1 },
     // the bottom padding (room for the floating bar) is added in the component

@@ -2,8 +2,9 @@ import { useContext, useState } from "react";
 import { Modal, Pressable, StyleSheet, Text } from "react-native";
 import { Ionicons } from "@react-native-vector-icons/ionicons";
 
-import { STARRED_BOX, StarredContext } from "./StarredField.js";
-import { COLORS, EYEBROW, FONTS, PANEL_SHADOW, RADIUS } from "./theme.js";
+import { StarredContext } from "./StarredField.js";
+import { FONTS, RADIUS } from "./theme.js";
+import { useTheme, useThemedStyles } from "./ThemeContext.js";
 
 // Simple mode wording; never statistical terms
 export const VARIANCE_OPTIONS = [
@@ -29,6 +30,8 @@ export const BURST_OPTIONS = [
  */
 export default function LevelPicker({ value, on_change, options, has_error = false, label })
 {
+    const { COLORS, STARRED_BOX } = useTheme();
+    const styles = useThemedStyles(make_styles);
     const [open, set_open] = useState(false);
     const selected = options.find((o) => o.value === value);
     // amber box when the AI couldn't fill this field (red wins if there's also a problem)
@@ -82,7 +85,7 @@ export default function LevelPicker({ value, on_change, options, has_error = fal
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS, EYEBROW, PANEL_SHADOW }) => StyleSheet.create({
     box: {
         minHeight: 50, minWidth: 180, paddingHorizontal: 14, gap: 8,
         flexDirection: "row", alignItems: "center", justifyContent: "space-between",

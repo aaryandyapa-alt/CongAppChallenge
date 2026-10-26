@@ -10,7 +10,8 @@ import Gradient from "../../components/Gradient.js";
 import { format_date_time } from "../../components/TimeInput.js";
 import { useSettings } from "../../state/SettingsContext.js";
 import { list_runs, load_info } from "../../storage.js";
-import { CARD_SHADOW, COLORS, EYEBROW, FLOATING_SHADOW, FONTS, RADIUS, TAB_BAR } from "../../components/theme.js";
+import { FONTS, RADIUS, TAB_BAR } from "../../components/theme.js";
+import { useTheme, useThemedStyles } from "../../components/ThemeContext.js";
 
 // every saved run with its run_info.json, newest first
 async function load_runs()
@@ -29,6 +30,8 @@ async function load_runs()
  */
 export default function HomeScreen()
 {
+    const { COLORS } = useTheme();
+    const styles = useThemedStyles(make_styles);
     // null while loading
     const [runs, set_runs] = useState(null);
     const [search, set_search] = useState("");
@@ -107,6 +110,7 @@ export default function HomeScreen()
                             <Ionicons name="search" size={20} color={COLORS.text_faint} />
                             <TextInput
                                 style={styles.search_input}
+                                placeholderTextColor={COLORS.placeholder}
                                 value={search}
                                 onChangeText={set_search}
                                 placeholder="Search runs"
@@ -149,7 +153,7 @@ export default function HomeScreen()
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS, EYEBROW, CARD_SHADOW, FLOATING_SHADOW }) => StyleSheet.create({
     screen: { flex: 1, backgroundColor: COLORS.background },
     top: { paddingHorizontal: 16, paddingTop: 16, gap: 18 },
     // a glass pill

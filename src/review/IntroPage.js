@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
-import { CARD_SHADOW, COLORS, EYEBROW, FONTS, RADIUS } from "../components/theme.js";
+import { FONTS, RADIUS } from "../components/theme.js";
+import { useThemedStyles } from "../components/ThemeContext.js";
 
 const HOW_TO = "Next, you'll go through a few pages describing how your site runs. Tap Next to move through them, or tap a circle on the progress bar to jump to one.";
 
@@ -18,6 +19,7 @@ const MESSAGES = {
  */
 export default function IntroPage({ draft })
 {
+    const styles = useThemedStyles(make_styles);
     return (
         <View style={styles.card}>
             <Text style={styles.message}>{MESSAGES[draft.start_state] ?? MESSAGES["skipped"]}</Text>
@@ -28,7 +30,7 @@ export default function IntroPage({ draft })
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS, EYEBROW, CARD_SHADOW }) => StyleSheet.create({
     card: {
         padding: 22, gap: 12, borderRadius: RADIUS.panel,
         backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.glass_edge, ...CARD_SHADOW,

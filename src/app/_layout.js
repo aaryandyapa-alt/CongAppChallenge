@@ -8,17 +8,40 @@ import { PlusJakartaSans_800ExtraBold } from "@expo-google-fonts/plus-jakarta-sa
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 
 import { DraftRunProvider } from "../state/DraftRunContext.js";
 import { SettingsProvider } from "../state/SettingsContext.js";
-import { COLORS } from "../components/theme.js";
+import { ThemeProvider, useTheme } from "../components/ThemeContext.js";
 
 // keep the splash screen up until the fonts are in, so text never flashes in the phone's own font first
 SplashScreen.preventAutoHideAsync();
 
+// the navigator, inside the providers so it can use the current theme
+function AppStack()
+{
+    const { COLORS, dark } = useTheme();
+
+    return (
+        <>
+            {/* light status bar icons on the dark theme, dark ones on the light theme */}
+            <StatusBar style={dark ? "light" : "dark"} />
+            {/* no header bars: each screen draws its own top (TopBar, BrandHeader, or Review's top),
+                and the loading screens have none */}
+            <Stack
+                screenOptions={{
+                    headerShown: false,
+                    // the page color behind any screen that doesn't set its own background
+                    contentStyle: { backgroundColor: COLORS.background },
+                }}
+            />
+        </>
+    );
+}
+
 // root navigator: the tabs, with every other screen pushed on top of them
-// the providers are outside the stack so the settings and the draft run are shared by every screen
+// the providers are outside the stack so the settings, theme and draft run are shared by every screen
 export default function RootLayout()
 {
     // the names here are the fontFamily values in FONTS (theme.js)
@@ -43,17 +66,11 @@ export default function RootLayout()
 
     return (
         <SettingsProvider>
-            <DraftRunProvider>
-                {/* no header bars: each screen draws its own top (TopBar, BrandHeader, or Review's top),
-                    and the loading screens have none */}
-                <Stack
-                    screenOptions={{
-                        headerShown: false,
-                        // cream behind any screen that doesn't set its own background
-                        contentStyle: { backgroundColor: COLORS.background },
-                    }}
-                />
-            </DraftRunProvider>
+            <ThemeProvider>
+                <DraftRunProvider>
+                    <AppStack />
+                </DraftRunProvider>
+            </ThemeProvider>
         </SettingsProvider>
     );
 }

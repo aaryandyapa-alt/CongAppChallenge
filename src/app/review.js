@@ -18,7 +18,8 @@ import StationPage from "../review/StationPage.js";
 import SummaryPage from "../review/SummaryPage.js";
 import { useDraftRun } from "../state/DraftRunContext.js";
 import { useSettings } from "../state/SettingsContext.js";
-import { CARD_SHADOW, COLORS, EYEBROW, FONTS, HEADER_SHADOW, RADIUS } from "../components/theme.js";
+import { FONTS, RADIUS } from "../components/theme.js";
+import { useThemedStyles } from "../components/ThemeContext.js";
 
 // how many station pages to show; none while the count is blank or not a whole number
 function shown_station_count(count)
@@ -48,6 +49,7 @@ function build_pages(draft)
  */
 export default function ReviewScreen()
 {
+    const styles = useThemedStyles(make_styles);
     const { draft, errors, edit_field, go_to_page } = useDraftRun();
     const { settings } = useSettings();
     const insets = useSafeAreaInsets();
@@ -159,7 +161,7 @@ export default function ReviewScreen()
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS, EYEBROW, CARD_SHADOW, HEADER_SHADOW }) => StyleSheet.create({
     screen: { flex: 1, backgroundColor: COLORS.background },
     // above the page (zIndex) so its shadow isn't covered by it
     top: { paddingBottom: 2, backgroundColor: COLORS.surface, zIndex: 1, ...HEADER_SHADOW },

@@ -2,8 +2,9 @@ import { useContext, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 import Gradient from "./Gradient.js";
-import { STARRED_BOX, StarredContext } from "./StarredField.js";
-import { CENTERED_TEXT, COLORS, FONTS, RADIUS } from "./theme.js";
+import { StarredContext } from "./StarredField.js";
+import { CENTERED_TEXT, FONTS, RADIUS } from "./theme.js";
+import { useTheme, useThemedStyles } from "./ThemeContext.js";
 
 // minutes after midnight -> what the boxes show
 function to_parts(value, default_pm)
@@ -65,6 +66,8 @@ function to_minutes(parts)
  */
 export default function TimeInput({ value, on_change, default_pm = false, has_error = false, label })
 {
+    const { COLORS, STARRED_BOX } = useTheme();
+    const styles = useThemedStyles(make_styles);
     const [parts, set_parts] = useState(to_parts(value, default_pm));
     // amber boxes when the AI couldn't fill this field (red wins if there's also a problem)
     const starred = useContext(StarredContext);
@@ -98,6 +101,7 @@ export default function TimeInput({ value, on_change, default_pm = false, has_er
                 inputMode="numeric"
                 maxLength={2}
                 placeholder="hh"
+                placeholderTextColor={COLORS.placeholder}
                 accessibilityLabel={`${label}, hour`}
             />
             <Text style={styles.colon}>:</Text>
@@ -108,6 +112,7 @@ export default function TimeInput({ value, on_change, default_pm = false, has_er
                 inputMode="numeric"
                 maxLength={2}
                 placeholder="mm"
+                placeholderTextColor={COLORS.placeholder}
                 accessibilityLabel={`${label}, minutes`}
             />
             <View style={styles.switch}>
@@ -133,7 +138,7 @@ export default function TimeInput({ value, on_change, default_pm = false, has_er
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS }) => StyleSheet.create({
     row: { flexDirection: "row", alignItems: "center", gap: 6 },
     box: {
         width: 58, minHeight: 50,

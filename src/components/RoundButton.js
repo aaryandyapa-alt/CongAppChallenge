@@ -1,7 +1,7 @@
 import { router } from "expo-router";
 import { Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@react-native-vector-icons/ionicons";
-import { CARD_SHADOW, COLORS } from "./theme.js";
+import { useTheme, useThemedStyles } from "./ThemeContext.js";
 
 const SIZE = 44;
 
@@ -15,6 +15,8 @@ const SIZE = 44;
  */
 export default function RoundButton({ icon, on_press, label, hint })
 {
+    const { COLORS } = useTheme();
+    const styles = useThemedStyles(make_styles);
     return (
         <Pressable
             onPress={on_press}
@@ -37,7 +39,7 @@ export function BackButton()
     return <RoundButton icon="arrow-back" on_press={() => router.back()} label="Back" />;
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS, CARD_SHADOW }) => StyleSheet.create({
     // a frosted glass circle with a bright edge
     button: {
         width: SIZE, height: SIZE, borderRadius: SIZE / 2, alignItems: "center", justifyContent: "center",

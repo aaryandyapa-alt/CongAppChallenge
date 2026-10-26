@@ -5,7 +5,8 @@ import PathDiagram, { variance_text } from "../components/PathDiagram.js";
 import { format_time } from "../components/TimeInput.js";
 import { check_overload } from "../lib/form_checks.js";
 import { total_workers } from "../lib/form_to_schema.js";
-import { CARD_SHADOW, COLORS, EYEBROW, FONTS, RADIUS } from "../components/theme.js";
+import { FONTS, RADIUS } from "../components/theme.js";
+import { useTheme, useThemedStyles } from "../components/ThemeContext.js";
 
 // "about 20", or "fewer than 1" for tiny rates
 function about(rate)
@@ -19,6 +20,8 @@ const or_dash = (v) => v === null || v === undefined || v === "" || Number.isNaN
 // one line of the facts card
 function Fact({ icon, text })
 {
+    const { COLORS } = useTheme();
+    const styles = useThemedStyles(make_styles);
     return (
         <View style={styles.fact_row}>
             <View style={styles.fact_icon}>
@@ -36,6 +39,8 @@ function Fact({ icon, text })
  */
 export default function SummaryPage({ draft, errors, station_count, saved = false })
 {
+    const { COLORS } = useTheme();
+    const styles = useThemedStyles(make_styles);
     const { basics, arrivals, stations } = draft.form;
     const pro = draft.mode === "pro";
     const problem_count = Object.keys(errors).length;
@@ -91,7 +96,7 @@ export default function SummaryPage({ draft, errors, station_count, saved = fals
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS, EYEBROW, CARD_SHADOW }) => StyleSheet.create({
     // a glass card
     facts: {
         padding: 18, gap: 12, marginBottom: 22, borderRadius: RADIUS.panel,

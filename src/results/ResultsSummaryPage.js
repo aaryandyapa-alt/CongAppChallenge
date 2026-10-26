@@ -3,7 +3,8 @@ import { Ionicons } from "@react-native-vector-icons/ionicons";
 
 import PrimaryButton from "../components/PrimaryButton.js";
 import { measures, SCENARIOS, TITLES } from "../lib/result_sentences.js";
-import { CARD_SHADOW, COLORS, FONTS, RADIUS } from "../components/theme.js";
+import { FONTS, RADIUS } from "../components/theme.js";
+import { useTheme, useThemedStyles } from "../components/ThemeContext.js";
 
 /**
  * The last results page: every setup side by side. The app never picks one for the user;
@@ -15,6 +16,8 @@ import { CARD_SHADOW, COLORS, FONTS, RADIUS } from "../components/theme.js";
  */
 export default function ResultsSummaryPage({ output, on_jump, on_home })
 {
+    const { COLORS } = useTheme();
+    const styles = useThemedStyles(make_styles);
     const current = output["current"];
 
     return (
@@ -54,7 +57,7 @@ export default function ResultsSummaryPage({ output, on_jump, on_home })
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS, CARD_SHADOW }) => StyleSheet.create({
     title: { fontSize: 26, fontFamily: FONTS.extrabold, color: COLORS.text, marginBottom: 8, letterSpacing: -0.5, lineHeight: 32 },
     intro: { fontFamily: FONTS.regular, fontSize: 16, lineHeight: 23, color: COLORS.text_secondary, marginBottom: 18 },
     // glass cards

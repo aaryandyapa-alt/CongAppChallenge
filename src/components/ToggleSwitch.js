@@ -1,5 +1,5 @@
 import { Platform, Switch } from "react-native";
-import { COLORS } from "./theme.js";
+import { useTheme } from "./ThemeContext.js";
 
 /**
  * An on/off switch in the app's colors. Android otherwise draws the knob in the phone's own accent color
@@ -11,6 +11,7 @@ import { COLORS } from "./theme.js";
  */
 export default function ToggleSwitch({ value, on_change, label })
 {
+    const { COLORS } = useTheme();
     const thumb = Platform.OS === "android" ? (value ? COLORS.accent_text : COLORS.surface) : undefined;
 
     return (

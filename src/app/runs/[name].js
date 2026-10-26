@@ -14,13 +14,15 @@ import { schema_to_form } from "../../lib/form_to_schema.js";
 import SummaryPage from "../../review/SummaryPage.js";
 import { useDraftRun } from "../../state/DraftRunContext.js";
 import { delete_run, load_info, load_input } from "../../storage.js";
-import { COLORS, FONTS, RADIUS } from "../../components/theme.js";
+import { FONTS, RADIUS } from "../../components/theme.js";
+import { useThemedStyles } from "../../components/ThemeContext.js";
 
 /**
  * A saved run: its inputs, plus View results, Duplicate and Delete.
  */
 export default function SavedRunScreen()
 {
+    const styles = useThemedStyles(make_styles);
     const { name } = useLocalSearchParams();
     const { begin_duplicate } = useDraftRun();
     // null while loading, then { input, info }, or { missing: true }
@@ -114,7 +116,7 @@ export default function SavedRunScreen()
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS }) => StyleSheet.create({
     screen: { flex: 1, backgroundColor: COLORS.background },
     // the bottom padding (room for the floating bar) is added in the component
     body: { paddingHorizontal: 20 },

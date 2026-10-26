@@ -4,7 +4,8 @@ import { Ionicons } from "@react-native-vector-icons/ionicons";
 import Gradient from "./Gradient.js";
 import OutlineButton from "./OutlineButton.js";
 import PrimaryButton from "./PrimaryButton.js";
-import { COLORS, FONTS, PANEL_SHADOW, RADIUS } from "./theme.js";
+import { FONTS, RADIUS } from "./theme.js";
+import { useTheme, useThemedStyles } from "./ThemeContext.js";
 
 /**
  * A themed "are you sure?" box, in place of the phone's plain system alert.
@@ -24,6 +25,8 @@ import { COLORS, FONTS, PANEL_SHADOW, RADIUS } from "./theme.js";
  */
 export default function ConfirmDialog({ visible, icon, title, message, cancel_label, confirm_label, danger, on_cancel, on_confirm })
 {
+    const { COLORS } = useTheme();
+    const styles = useThemedStyles(make_styles);
     const icon_content = <Ionicons name={icon} size={30} color={danger ? COLORS.error : COLORS.accent_text} />;
 
     return (
@@ -49,7 +52,7 @@ export default function ConfirmDialog({ visible, icon, title, message, cancel_la
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS, PANEL_SHADOW }) => StyleSheet.create({
     screen: { flex: 1, alignItems: "center", justifyContent: "center", padding: 28, backgroundColor: COLORS.backdrop },
     // solid white (nothing should show through over the dimmed page), with big round corners
     box: {

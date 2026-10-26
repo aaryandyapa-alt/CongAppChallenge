@@ -2,9 +2,10 @@ import { TextInput, StyleSheet } from "react-native";
 
 import LevelPicker, { VARIANCE_OPTIONS } from "../components/LevelPicker.js";
 import NumberInput from "../components/NumberInput.js";
-import StarredField, { STARRED_BOX } from "../components/StarredField.js";
+import StarredField from "../components/StarredField.js";
 import { field_status } from "../state/DraftRunContext.js";
-import { COLORS, FONTS, RADIUS } from "../components/theme.js";
+import { FONTS, RADIUS } from "../components/theme.js";
+import { useTheme, useThemedStyles } from "../components/ThemeContext.js";
 
 export const STATION_TYPE_OPTIONS = [
     { value: "staffed", label: "Staffed: workers help each person" },
@@ -25,6 +26,8 @@ export const DISTRIBUTION_OPTIONS = [
  */
 export default function StationPage({ draft, errors, edit_field, index })
 {
+    const { STARRED_BOX } = useTheme();
+    const styles = useThemedStyles(make_styles);
     const s = draft.form.stations[index];
     const pro = draft.mode === "pro";
     const p = `stations.${index}.`;
@@ -84,7 +87,7 @@ export default function StationPage({ draft, errors, edit_field, index })
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS }) => StyleSheet.create({
     name_box: {
         minHeight: 48, paddingHorizontal: 12,
         borderWidth: 1.5, borderColor: COLORS.border, borderRadius: RADIUS.input,

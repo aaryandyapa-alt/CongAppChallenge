@@ -2,7 +2,8 @@ import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import GlowBackground from "./GlowBackground.js";
 import Gradient from "./Gradient.js";
-import { CARD_SHADOW, COLORS, EYEBROW, FONTS, RADIUS } from "./theme.js";
+import { FONTS, RADIUS } from "./theme.js";
+import { useTheme, useThemedStyles } from "./ThemeContext.js";
 
 /**
  * A spinner with a message on a glass card, for "Generating values" and "Simulating".
@@ -20,6 +21,8 @@ import { CARD_SHADOW, COLORS, EYEBROW, FONTS, RADIUS } from "./theme.js";
  */
 export default function LoadingScreen({ message, detail, progress, status, status_detail, note, footer, top })
 {
+    const { COLORS } = useTheme();
+    const styles = useThemedStyles(make_styles);
     const insets = useSafeAreaInsets();
     const has_progress = typeof progress === "number";
     const percent = has_progress ? Math.round(progress * 100) : 0;
@@ -63,7 +66,7 @@ export default function LoadingScreen({ message, detail, progress, status, statu
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS, EYEBROW, CARD_SHADOW }) => StyleSheet.create({
     screen: { flex: 1, backgroundColor: COLORS.background },
     // the card, centered in the space above the footer
     middle: { flex: 1, justifyContent: "center", padding: 20 },

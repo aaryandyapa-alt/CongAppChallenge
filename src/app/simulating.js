@@ -7,7 +7,8 @@ import LoadingScreen from "../components/LoadingScreen.js";
 import PrimaryButton from "../components/PrimaryButton.js";
 import start_run from "../lib/start_run.js";
 import { useDraftRun } from "../state/DraftRunContext.js";
-import { CARD_SHADOW, COLORS, FONTS, RADIUS } from "../components/theme.js";
+import { FONTS, RADIUS } from "../components/theme.js";
+import { useThemedStyles } from "../components/ThemeContext.js";
 
 // what each optimizer stage is shown as (see run_optimizer_steps in optimization.js)
 const TUNING_DETAIL = "Moving one worker at a time to see if it helps";
@@ -42,6 +43,7 @@ function trying_text(update, stations)
  */
 export default function SimulatingScreen()
 {
+    const styles = useThemedStyles(make_styles);
     const { draft, finish_run } = useDraftRun();
     const [error, set_error] = useState(null);
     // true once this screen's run has finished and been saved
@@ -142,7 +144,7 @@ export default function SimulatingScreen()
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS, CARD_SHADOW }) => StyleSheet.create({
     error_screen: { flex: 1, padding: 20, justifyContent: "center", backgroundColor: COLORS.background },
     // a glass card, like the loading card it replaces
     error_card: {

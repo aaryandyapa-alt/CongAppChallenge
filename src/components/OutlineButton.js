@@ -2,7 +2,8 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@react-native-vector-icons/ionicons";
 
 import Gradient from "./Gradient.js";
-import { CENTERED_TEXT, COLORS, FONTS, RADIUS as RADII } from "./theme.js";
+import { CENTERED_TEXT, FONTS, RADIUS as RADII } from "./theme.js";
+import { useTheme, useThemedStyles } from "./ThemeContext.js";
 
 const RING = 2;     // thickness of the gradient outline
 const RADIUS = RADII.pill;
@@ -22,6 +23,8 @@ const RADIUS = RADII.pill;
  */
 export default function OutlineButton({ label, on_press, icon, danger, compact, style, hint })
 {
+    const { COLORS } = useTheme();
+    const styles = useThemedStyles(make_styles);
     const color = danger ? COLORS.error : COLORS.accent_text;
 
     return (
@@ -41,7 +44,7 @@ export default function OutlineButton({ label, on_press, icon, danger, compact, 
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS }) => StyleSheet.create({
     outer: { borderRadius: RADIUS },
     pressed: { opacity: 0.7 },
     // the gradient shows only in the RING-wide gap around the inner button

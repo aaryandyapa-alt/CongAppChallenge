@@ -1,6 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 
-import { GRADIENT_END, GRADIENT_START, GRADIENTS } from "./theme.js";
+import { GRADIENT_END, GRADIENT_START } from "./theme.js";
+import { useTheme } from "./ThemeContext.js";
 
 /**
  * One of the theme's gradients (see GRADIENTS in theme.js), drawn top-left to bottom-right.
@@ -10,6 +11,7 @@ import { GRADIENT_END, GRADIENT_START, GRADIENTS } from "./theme.js";
  */
 export default function Gradient({ name = "button", style, children, ...rest })
 {
+    const { GRADIENTS } = useTheme();
     return (
         <LinearGradient colors={GRADIENTS[name]} start={GRADIENT_START} end={GRADIENT_END} style={style} {...rest}>
             {children}

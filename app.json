@@ -6,7 +6,7 @@
     "scheme": "shiftlime",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.shiftlime.app"
@@ -31,7 +31,10 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#FAFCF4"
+          "backgroundColor": "#FAFCF4",
+          "dark": {
+            "backgroundColor": "#0F1611"
+          }
         }
       ]
     ],

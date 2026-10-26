@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@react-native-vector-icons/ionicons";
-import { COLORS, FONTS, RADIUS } from "./theme.js";
+import { FONTS, RADIUS } from "./theme.js";
+import { useTheme, useThemedStyles } from "./ThemeContext.js";
 
 /**
  * The small line at the top of each field page on runs the AI filled in, reminding the user to check the values.
@@ -8,6 +9,8 @@ import { COLORS, FONTS, RADIUS } from "./theme.js";
  */
 export default function AiReminder()
 {
+    const { COLORS } = useTheme();
+    const styles = useThemedStyles(make_styles);
     return (
         <View style={styles.row} accessible accessibilityLabel="These values were filled in by AI from your answers. Please check them.">
             <Ionicons name="sparkles-outline" size={16} color={COLORS.accent_deep} />
@@ -16,7 +19,7 @@ export default function AiReminder()
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS }) => StyleSheet.create({
     // a soft lime chip
     row: {
         flexDirection: "row", alignItems: "center", gap: 8, alignSelf: "flex-start", marginBottom: 16,

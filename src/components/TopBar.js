@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { COLORS, EYEBROW, FONTS, HEADER_SHADOW } from "./theme.js";
+import { FONTS } from "./theme.js";
+import { useThemedStyles } from "./ThemeContext.js";
 
 /**
  * The top of a screen that has no header bar: round buttons in the corners (below the status bar),
@@ -15,6 +16,7 @@ import { COLORS, EYEBROW, FONTS, HEADER_SHADOW } from "./theme.js";
  */
 export default function TopBar({ left, right, label, eyebrow, title, raised })
 {
+    const styles = useThemedStyles(make_styles);
     const insets = useSafeAreaInsets();
 
     return (
@@ -31,7 +33,7 @@ export default function TopBar({ left, right, label, eyebrow, title, raised })
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS, EYEBROW, HEADER_SHADOW }) => StyleSheet.create({
     bar: { paddingHorizontal: 16, paddingBottom: 4 },
     // like Review's top: frosted glass edge to edge, above the page (zIndex) so the shadow isn't covered by it
     raised: { paddingBottom: 12, backgroundColor: COLORS.surface, zIndex: 1, ...HEADER_SHADOW },

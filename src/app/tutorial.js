@@ -8,12 +8,13 @@ import GlowBackground from "../components/GlowBackground.js";
 import Gradient from "../components/Gradient.js";
 import OutlineButton from "../components/OutlineButton.js";
 import PrimaryButton from "../components/PrimaryButton.js";
-import { COLORS, FONTS } from "../components/theme.js";
+import { FONTS } from "../components/theme.js";
 import { check_run_name } from "../lib/form_checks.js";
 import { SAMPLE_NAME, SAMPLE_SCHEMA } from "../lib/sample_run.js";
 import { useDraftRun } from "../state/DraftRunContext.js";
 import { useSettings } from "../state/SettingsContext.js";
 import { list_runs } from "../storage.js";
+import { useTheme, useThemedStyles } from "../components/ThemeContext.js";
 
 /**
  * The slides. Each has an icon, a title and text, and can also have a picture (usually a cropped screenshot) shown
@@ -77,6 +78,8 @@ function sample_name()
  */
 export default function TutorialScreen()
 {
+    const { COLORS } = useTheme();
+    const styles = useThemedStyles(make_styles);
     const { width } = useWindowDimensions();
     const insets = useSafeAreaInsets();
     const { change_setting } = useSettings();
@@ -179,7 +182,7 @@ export default function TutorialScreen()
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS }) => StyleSheet.create({
     screen: { flex: 1, backgroundColor: COLORS.background },
     // keeps the same height whether or not Skip is showing, so the slides don't jump
     top_bar: { height: 48, paddingHorizontal: 20, alignItems: "flex-end", justifyContent: "center" },

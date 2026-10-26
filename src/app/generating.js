@@ -10,7 +10,8 @@ import { BackButton } from "../components/RoundButton.js";
 import TopBar from "../components/TopBar.js";
 import { extract } from "../lib/ai_client.js";
 import { useDraftRun } from "../state/DraftRunContext.js";
-import { CARD_SHADOW, COLORS, FONTS, RADIUS } from "../components/theme.js";
+import { FONTS, RADIUS } from "../components/theme.js";
+import { useThemedStyles } from "../components/ThemeContext.js";
 
 /**
  * "Generating values": sends the five answers to the AI in one call, fills the draft from the reply, then opens the intro.
@@ -18,6 +19,7 @@ import { CARD_SHADOW, COLORS, FONTS, RADIUS } from "../components/theme.js";
  */
 export default function GeneratingScreen()
 {
+    const styles = useThemedStyles(make_styles);
     const { draft, fill_from_ai, skip_questions } = useDraftRun();
     const [failed, set_failed] = useState(false);
     // bumped by Try again to send the answers again
@@ -99,7 +101,7 @@ export default function GeneratingScreen()
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS, CARD_SHADOW }) => StyleSheet.create({
     screen: { flex: 1, backgroundColor: COLORS.background },
     error_body: { flex: 1, padding: 20, justifyContent: "center" },
     // a glass card, like the loading card it replaces

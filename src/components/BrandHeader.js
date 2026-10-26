@@ -2,7 +2,8 @@ import { StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@react-native-vector-icons/ionicons";
 import Gradient from "./Gradient.js";
-import { BRAND_SHADOW, COLORS, FONTS, HEADER_SHADOW, HEADER_STYLE } from "./theme.js";
+import { FONTS, HEADER_STYLE } from "./theme.js";
+import { useTheme, useThemedStyles } from "./ThemeContext.js";
 
 const LOGO_ROW = 40;
 const PADDING_TOP = 6;
@@ -15,6 +16,8 @@ const PADDING_BOTTOM = 10;
  */
 export default function BrandHeader()
 {
+    const { COLORS } = useTheme();
+    const styles = useThemedStyles(make_styles);
     const insets = useSafeAreaInsets();
     const glass = HEADER_STYLE === "glass";
 
@@ -26,9 +29,10 @@ export default function BrandHeader()
                     <Ionicons name="leaf" size={18} color={COLORS.on_accent} />
                 </Gradient>
             ) : (
-                <Ionicons name="leaf" size={24} color={COLORS.text} />
+                <Ionicons name="leaf" size={24} color={COLORS.on_accent} />
             )}
-            <Text style={styles.name}>ShiftLime</Text>
+            {/* on the green band the name stays dark ink in both themes; on glass it follows the theme */}
+            <Text style={[styles.name, !glass && styles.name_on_green]}>ShiftLime</Text>
         </View>
     );
 
@@ -44,7 +48,7 @@ export default function BrandHeader()
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS, HEADER_SHADOW, BRAND_SHADOW }) => StyleSheet.create({
     // edge to edge, and only as tall as the logo needs
     band: { paddingHorizontal: 20, paddingBottom: PADDING_BOTTOM },
     // frosted white with a soft shadow, above the page (zIndex) so the shadow isn't covered by it
@@ -54,4 +58,5 @@ const styles = StyleSheet.create({
     logo: { flexDirection: "row", alignItems: "center", gap: 10, minHeight: LOGO_ROW },
     leaf_circle: { width: 32, height: 32, borderRadius: 16, overflow: "hidden", alignItems: "center", justifyContent: "center" },
     name: { fontSize: 23, fontFamily: FONTS.extrabold, color: COLORS.text, letterSpacing: -0.6 },
+    name_on_green: { color: COLORS.on_accent },
 });

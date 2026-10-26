@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import Gradient from "./Gradient.js";
-import { COLORS, CURRENT_GLOW, FONTS } from "./theme.js";
+import { FONTS } from "./theme.js";
+import { useTheme, useThemedStyles } from "./ThemeContext.js";
 
 const SIDE_PADDING = 20;
 const VERTICAL_PADDING = 12;
@@ -17,6 +18,8 @@ const LINE = 10;   // thickness of the bar
  */
 export default function ProgressCircles({ pages, current, on_jump })
 {
+    const { CURRENT_GLOW } = useTheme();
+    const styles = useThemedStyles(make_styles);
     const { width } = useWindowDimensions();
     const n = pages.length;
     // at most 30 across, at least 14; circles take about 70% of the space so the bar shows between them
@@ -69,7 +72,7 @@ export default function ProgressCircles({ pages, current, on_jump })
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS }) => StyleSheet.create({
     bar: { justifyContent: "center" },
     track: { position: "absolute", height: LINE, borderRadius: LINE / 2, backgroundColor: COLORS.track },
     fill: { height: LINE, borderRadius: LINE / 2 },
@@ -77,5 +80,6 @@ const styles = StyleSheet.create({
     // no outlines: pages not reached yet are the same color as the empty bar
     circle: { backgroundColor: COLORS.track, alignItems: "center", justifyContent: "center" },
     number: { fontSize: 13, fontFamily: FONTS.semibold, color: COLORS.text_muted },
-    number_filled: { color: COLORS.text },
+    // dark ink on the lime, red and amber fills, in both themes
+    number_filled: { color: COLORS.on_accent },
 });

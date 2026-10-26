@@ -2,7 +2,8 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@react-native-vector-icons/ionicons";
 
 import Gradient from "./Gradient.js";
-import { BUTTON_GLOW, CENTERED_TEXT, COLORS, FONTS, RADIUS } from "./theme.js";
+import { CENTERED_TEXT, FONTS, RADIUS } from "./theme.js";
+import { useTheme, useThemedStyles } from "./ThemeContext.js";
 
 /**
  * The app's main button: a lime gradient pill with dark text and a soft lime glow underneath,
@@ -18,6 +19,8 @@ import { BUTTON_GLOW, CENTERED_TEXT, COLORS, FONTS, RADIUS } from "./theme.js";
  */
 export default function PrimaryButton({ label, on_press, disabled = false, icon, style, hint })
 {
+    const { COLORS, BUTTON_GLOW } = useTheme();
+    const styles = useThemedStyles(make_styles);
     const content = (
         <>
             {icon ? <Ionicons name={icon} size={20} color={COLORS.on_accent} /> : null}
@@ -42,7 +45,7 @@ export default function PrimaryButton({ label, on_press, disabled = false, icon,
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS }) => StyleSheet.create({
     outer: { borderRadius: RADIUS.pill },
     inner: {
         minHeight: 54, paddingHorizontal: 20, borderRadius: RADIUS.pill, overflow: "hidden",

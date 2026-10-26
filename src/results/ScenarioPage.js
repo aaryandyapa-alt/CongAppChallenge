@@ -2,7 +2,8 @@ import { StyleSheet, Text, View } from "react-native";
 
 import PathDiagram, { variance_text } from "../components/PathDiagram.js";
 import { BALANCE_EXPLAINED, compared_with_current, measures, scenario_sentence, TITLES } from "../lib/result_sentences.js";
-import { CARD_SHADOW, COLORS, EYEBROW, FONTS, RADIUS } from "../components/theme.js";
+import { FONTS, RADIUS } from "../components/theme.js";
+import { useThemedStyles } from "../components/ThemeContext.js";
 
 /**
  * One results page: the current setup, or the setup that does best on one measure.
@@ -14,6 +15,7 @@ import { CARD_SHADOW, COLORS, EYEBROW, FONTS, RADIUS } from "../components/theme
  */
 export default function ScenarioPage({ scenario_key, output, form, pro })
 {
+    const styles = useThemedStyles(make_styles);
     const scenario = output[scenario_key];
     const current = output["current"];
     const all = measures(scenario["metrics"]);
@@ -63,7 +65,7 @@ export default function ScenarioPage({ scenario_key, output, form, pro })
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS, EYEBROW, CARD_SHADOW }) => StyleSheet.create({
     title: { fontSize: 26, fontFamily: FONTS.extrabold, color: COLORS.text, marginBottom: 16, letterSpacing: -0.5, lineHeight: 32 },
     // the big glass panel with the headline number
     headline: {

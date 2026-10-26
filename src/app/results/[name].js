@@ -15,7 +15,8 @@ import ResultsSummaryPage from "../../results/ResultsSummaryPage.js";
 import ScenarioPage from "../../results/ScenarioPage.js";
 import { useSettings } from "../../state/SettingsContext.js";
 import { load_info, load_input, load_output } from "../../storage.js";
-import { CARD_SHADOW, COLORS, FONTS } from "../../components/theme.js";
+import { FONTS } from "../../components/theme.js";
+import { useTheme, useThemedStyles } from "../../components/ThemeContext.js";
 
 // the four scenario pages, then the Summary
 const PAGES = [...SCENARIOS, "summary"];
@@ -23,6 +24,8 @@ const PAGES = [...SCENARIOS, "summary"];
 // a round arrow button at the middle of one side; faded and untappable when there's no page that way
 function Arrow({ side, enabled, on_press })
 {
+    const { COLORS } = useTheme();
+    const styles = useThemedStyles(make_styles);
     return (
         <Pressable
             style={[styles.arrow, side === "left" ? styles.arrow_left : styles.arrow_right, !enabled && styles.arrow_off]}
@@ -48,6 +51,7 @@ function Arrow({ side, enabled, on_press })
  */
 export default function ResultsScreen()
 {
+    const styles = useThemedStyles(make_styles);
     const { name, from } = useLocalSearchParams();
     const { width } = useWindowDimensions();
     const list = useRef(null);
@@ -152,7 +156,7 @@ export default function ResultsScreen()
 
 const ARROW = 44;
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS, CARD_SHADOW }) => StyleSheet.create({
     screen: { flex: 1, backgroundColor: COLORS.background },
     // side padding leaves room for the arrow buttons
     // the bottom padding (room for the floating bar) is added in the component
