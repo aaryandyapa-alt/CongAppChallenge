@@ -1,26 +1,36 @@
-import { Stack, router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@react-native-vector-icons/ionicons";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
+import BottomBar from "../../components/BottomBar.js";
+import ConfirmDialog from "../../components/ConfirmDialog.js";
+import GlowBackground from "../../components/GlowBackground.js";
+import OutlineButton from "../../components/OutlineButton.js";
+import PrimaryButton from "../../components/PrimaryButton.js";
+import { BackButton } from "../../components/RoundButton.js";
+import TopBar from "../../components/TopBar.js";
 import { format_date_time } from "../../components/TimeInput.js";
 import { schema_to_form } from "../../lib/form_to_schema.js";
 import SummaryPage from "../../review/SummaryPage.js";
 import { useDraftRun } from "../../state/DraftRunContext.js";
 import { delete_run, load_info, load_input } from "../../storage.js";
-import { COLORS } from "../../components/theme.js";
+import { FONTS, RADIUS } from "../../components/theme.js";
+import { useThemedStyles } from "../../components/ThemeContext.js";
 
 /**
  * A saved run: its inputs, plus View results, Duplicate and Delete.
  */
 export default function SavedRunScreen()
 {
+    const styles = useThemedStyles(make_styles);
     const { name } = useLocalSearchParams();
-    const insets = useSafeAreaInsets();
     const { begin_duplicate } = useDraftRun();
     // null while loading, then { input, info }, or { missing: true }
     const [run, set_run] = useState(null);
+    // the "Delete this run?" box is open
+    const [asking, set_asking] = useState(false);
+    // how much of the bottom the floating buttons cover; the page gets that much room at its end
+    const [bar_height, set_bar_height] = useState(0);
 
     useEffect(() =>
     {
@@ -35,9 +45,11 @@ export default function SavedRunScreen()
     if (run.missing)
     {
         return (
-            <View style={[styles.screen, styles.missing]}>
-                <Stack.Screen options={{ title: name }} />
-                <Text style={styles.missing_text}>This run couldn&apos;t be found.</Text>
+            <View style={styles.screen}>
+                <TopBar left={<BackButton />} title={name} />
+                <View style={styles.missing}>
+                    <Text style={styles.missing_text}>This run couldn&apos;t be found.</Text>
+                </View>
             </View>
         );
     }
@@ -52,75 +64,70 @@ export default function SavedRunScreen()
         router.push({ pathname: "/new-run", params: { duplicate: "1" } });
     }
 
-    function confirm_delete()
+    function delete_this_run()
     {
-        Alert.alert(
-            "Delete this run?",
-            `"${name}" and its results will be deleted. This can't be undone.`,
-            [
-                { text: "Cancel", style: "cancel" },
-                {
-                    text: "Delete",
-                    style: "destructive",
-                    onPress: () =>
-                    {
-                        delete_run(name);
-                        router.back();
-                    },
-                },
-            ],
-        );
+        set_asking(false);
+        delete_run(name);
+        router.back();
     }
 
     return (
         <View style={styles.screen}>
-            <Stack.Screen options={{ title: name }} />
-            <ScrollView contentContainerStyle={styles.body}>
-                <Text style={styles.meta}>
-                    {[format_date_time(run.info?.date_run), mode === "pro" ? "Advanced" : "Simple"].filter(Boolean).join("  ·  ")}
-                </Text>
+            <GlowBackground />
+            <TopBar left={<BackButton />} eyebrow="Saved run" title={name} />
+            <ScrollView contentContainerStyle={[styles.body, { paddingBottom: bar_height + 20 }]}>
+                {/* when it was run and its mode, as soft chips under the title */}
+                <View style={styles.chips}>
+                    {[format_date_time(run.info?.date_run), mode === "pro" ? "Advanced" : "Simple"].filter(Boolean).map((text) => (
+                        <Text key={text} style={styles.chip}>{text}</Text>
+                    ))}
+                </View>
                 {/* the same summary the user saw before simulating; a saved run has no problems to show */}
                 <SummaryPage draft={{ form: form, mode: mode }} errors={{}} station_count={form.stations.length} saved />
             </ScrollView>
 
-            <View style={[styles.bar, { paddingBottom: 12 + insets.bottom }]}>
-                <Pressable
-                    style={styles.primary}
-                    onPress={() => router.push({ pathname: "/results/[name]", params: { name: name } })}
-                    accessibilityRole="button"
-                >
-                    <Text style={styles.primary_text}>View results</Text>
-                </Pressable>
+            <BottomBar on_height={set_bar_height}>
+                <PrimaryButton label="View results" on_press={() => router.push({ pathname: "/results/[name]", params: { name: name } })} />
                 <View style={styles.row}>
-                    <Pressable style={styles.secondary} onPress={duplicate} accessibilityRole="button" accessibilityHint="Copies this run so you can change it and simulate again">
-                        <Ionicons name="copy-outline" size={20} color={COLORS.accent} />
-                        <Text style={styles.secondary_text}>Duplicate</Text>
-                    </Pressable>
-                    <Pressable style={[styles.secondary, styles.danger]} onPress={confirm_delete} accessibilityRole="button">
-                        <Ionicons name="trash-outline" size={20} color={COLORS.error} />
-                        <Text style={[styles.secondary_text, styles.danger_text]}>Delete</Text>
-                    </Pressable>
+                    <OutlineButton
+                        label="Duplicate"
+                        icon="copy-outline"
+                        on_press={duplicate}
+                        compact
+                        style={styles.half}
+                        hint="Copies this run so you can change it and simulate again"
+                    />
+                    <OutlineButton label="Delete" icon="trash-outline" on_press={() => set_asking(true)} danger compact style={styles.half} />
                 </View>
-            </View>
+            </BottomBar>
+
+            <ConfirmDialog
+                visible={asking}
+                icon="trash-outline"
+                title="Delete this run?"
+                message={`"${name}" and its results will be deleted. This can't be undone.`}
+                cancel_label="Cancel"
+                confirm_label="Delete"
+                danger
+                on_cancel={() => set_asking(false)}
+                on_confirm={delete_this_run}
+            />
         </View>
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS }) => StyleSheet.create({
     screen: { flex: 1, backgroundColor: COLORS.background },
-    body: { padding: 20 },
-    meta: { fontSize: 15, color: COLORS.text_muted, marginBottom: 16 },
-    bar: { paddingHorizontal: 20, paddingTop: 12, gap: 10, borderTopWidth: 1, borderTopColor: COLORS.divider, backgroundColor: COLORS.surface },
-    primary: { minHeight: 52, borderRadius: 8, backgroundColor: COLORS.accent, alignItems: "center", justifyContent: "center" },
-    primary_text: { fontSize: 18, fontWeight: "600", color: COLORS.on_accent },
-    row: { flexDirection: "row", gap: 10 },
-    secondary: {
-        flex: 1, minHeight: 48, borderRadius: 8, borderWidth: 2, borderColor: COLORS.accent,
-        flexDirection: "row", gap: 6, alignItems: "center", justifyContent: "center", backgroundColor: COLORS.surface,
+    // the bottom padding (room for the floating bar) is added in the component
+    body: { paddingHorizontal: 20 },
+    // right under the title, lined up with it
+    chips: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 6, marginBottom: 18, paddingHorizontal: 2 },
+    chip: {
+        fontFamily: FONTS.semibold, fontSize: 13, color: COLORS.accent_deep,
+        paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: COLORS.accent_tint, overflow: "hidden",
     },
-    secondary_text: { fontSize: 16, fontWeight: "600", color: COLORS.accent },
-    danger: { borderColor: COLORS.error },
-    danger_text: { color: COLORS.error },
-    missing: { alignItems: "center", justifyContent: "center", padding: 24 },
-    missing_text: { fontSize: 17, color: COLORS.text, textAlign: "center" },
+    row: { flexDirection: "row", gap: 10 },
+    half: { flex: 1 },
+    missing: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24 },
+    missing_text: { fontFamily: FONTS.regular, fontSize: 17, color: COLORS.text, textAlign: "center" },
 });

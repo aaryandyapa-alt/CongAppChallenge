@@ -1,11 +1,17 @@
-import { Redirect, Stack, router } from "expo-router";
+import { Redirect, router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
+import GlowBackground from "../components/GlowBackground.js";
 import LoadingScreen from "../components/LoadingScreen.js";
+import OutlineButton from "../components/OutlineButton.js";
+import PrimaryButton from "../components/PrimaryButton.js";
+import { BackButton } from "../components/RoundButton.js";
+import TopBar from "../components/TopBar.js";
 import { extract } from "../lib/ai_client.js";
 import { useDraftRun } from "../state/DraftRunContext.js";
-import { COLORS } from "../components/theme.js";
+import { FONTS, RADIUS } from "../components/theme.js";
+import { useThemedStyles } from "../components/ThemeContext.js";
 
 /**
  * "Generating values": sends the five answers to the AI in one call, fills the draft from the reply, then opens the intro.
@@ -13,6 +19,7 @@ import { COLORS } from "../components/theme.js";
  */
 export default function GeneratingScreen()
 {
+    const styles = useThemedStyles(make_styles);
     const { draft, fill_from_ai, skip_questions } = useDraftRun();
     const [failed, set_failed] = useState(false);
     // bumped by Try again to send the answers again
@@ -52,46 +59,57 @@ export default function GeneratingScreen()
     if (failed)
     {
         return (
-            <View style={styles.error_screen}>
-                <Stack.Screen options={{ title: "Couldn't reach the AI" }} />
-                <Text style={styles.error_text}>
-                    We couldn&apos;t reach the AI. Check your connection and try again, or fill in the pages yourself.
-                </Text>
-                <Pressable
-                    style={styles.primary}
-                    onPress={() =>
-                    {
-                        set_failed(false);
-                        set_attempt(attempt + 1);
-                    }}
-                    accessibilityRole="button"
-                >
-                    <Text style={styles.primary_text}>Try again</Text>
-                </Pressable>
-                <Pressable
-                    style={styles.secondary}
-                    onPress={() =>
-                    {
-                        // the same as Skip: every page starts blank
-                        skip_questions();
-                        router.replace("/intro");
-                    }}
-                    accessibilityRole="button"
-                >
-                    <Text style={styles.secondary_text}>Fill in myself</Text>
-                </Pressable>
+            <View style={styles.screen}>
+                <GlowBackground />
+                <TopBar left={<BackButton />} />
+                <View style={styles.error_body}>
+                    <View style={styles.error_card}>
+                        <Text style={styles.error_title}>Couldn&apos;t reach the AI</Text>
+                        <Text style={styles.error_text}>
+                            Check your connection and try again, or fill in the pages yourself.
+                        </Text>
+                        <PrimaryButton
+                            label="Try again"
+                            on_press={() =>
+                            {
+                                set_failed(false);
+                                set_attempt(attempt + 1);
+                            }}
+                        />
+                        <OutlineButton
+                            label="Fill in myself"
+                            on_card
+                            on_press={() =>
+                            {
+                                // the same as Skip: every page starts blank
+                                skip_questions();
+                                router.replace("/intro");
+                            }}
+                        />
+                    </View>
+                </View>
             </View>
         );
     }
 
-    return <LoadingScreen message="Generating values" detail="Reading your answers. This usually takes a few seconds." />;
+    // no title bar, just a back button in the corner to cancel and return to the questions
+    return (
+        <LoadingScreen
+            top={<TopBar left={<BackButton />} />}
+            message="Generating values"
+            detail="Reading your answers. This usually takes a few seconds."
+        />
+    );
 }
 
-const styles = StyleSheet.create({
-    error_screen: { flex: 1, padding: 24, gap: 14, justifyContent: "center", backgroundColor: COLORS.background },
-    error_text: { fontSize: 18, lineHeight: 26, color: COLORS.text, marginBottom: 8 },
-    primary: { minHeight: 52, borderRadius: 8, backgroundColor: COLORS.accent, alignItems: "center", justifyContent: "center" },
-    primary_text: { fontSize: 18, fontWeight: "600", color: COLORS.on_accent },
-    secondary: { minHeight: 52, borderRadius: 8, borderWidth: 2, borderColor: COLORS.accent, alignItems: "center", justifyContent: "center", backgroundColor: COLORS.surface },
-    secondary_text: { fontSize: 18, fontWeight: "600", color: COLORS.accent },
+const make_styles = ({ COLORS, CARD_SHADOW }) => StyleSheet.create({
+    screen: { flex: 1, backgroundColor: COLORS.background },
+    error_body: { flex: 1, padding: 20, justifyContent: "center" },
+    // a glass card, like the loading card it replaces
+    error_card: {
+        padding: 24, gap: 14, borderRadius: RADIUS.panel,
+        backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.glass_edge, ...CARD_SHADOW,
+    },
+    error_title: { fontSize: 24, fontFamily: FONTS.extrabold, color: COLORS.text, letterSpacing: -0.4 },
+    error_text: { fontFamily: FONTS.regular, fontSize: 17, lineHeight: 25, color: COLORS.text_secondary, marginBottom: 6 },
 });

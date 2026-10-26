@@ -1,11 +1,15 @@
 import { Redirect, Stack, router, usePreventRemove } from "expo-router";
-import { useHeaderHeight } from "expo-router/react-navigation";
-import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import { KeyboardAvoidingView, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import AiReminder from "../components/AiReminder.js";
+import BottomBar from "../components/BottomBar.js";
+import GlowBackground from "../components/GlowBackground.js";
 import HomeButton from "../components/HomeButton.js";
+import PrimaryButton from "../components/PrimaryButton.js";
 import ProgressCircles from "../components/ProgressCircles.js";
+import { BackButton } from "../components/RoundButton.js";
 import { has_errors, MAX_STATIONS } from "../lib/form_checks.js";
 import ArrivalsPage from "../review/ArrivalsPage.js";
 import BasicsPage from "../review/BasicsPage.js";
@@ -14,7 +18,8 @@ import StationPage from "../review/StationPage.js";
 import SummaryPage from "../review/SummaryPage.js";
 import { useDraftRun } from "../state/DraftRunContext.js";
 import { useSettings } from "../state/SettingsContext.js";
-import { COLORS } from "../components/theme.js";
+import { FONTS, RADIUS } from "../components/theme.js";
+import { useThemedStyles } from "../components/ThemeContext.js";
 
 // how many station pages to show; none while the count is blank or not a whole number
 function shown_station_count(count)
@@ -44,15 +49,17 @@ function build_pages(draft)
  */
 export default function ReviewScreen()
 {
+    const styles = useThemedStyles(make_styles);
     const { draft, errors, edit_field, go_to_page } = useDraftRun();
     const { settings } = useSettings();
     const insets = useSafeAreaInsets();
-    const header_height = useHeaderHeight();
+    // how much of the bottom the floating Next bar covers; the page gets that much room at its end
+    const [bar_height, set_bar_height] = useState(0);
 
     const pages = draft === null ? [] : build_pages(draft);
     const current = Math.min(draft?.page ?? 0, Math.max(pages.length - 1, 0));
 
-    // the header back arrow and Android's back button go to the previous page; on the first page they go back to the intro.
+    // the back arrow and Android's back button go to the previous page; on the first page they go back to the intro.
     // Once the run is finished, the simulating screen closes this one, so it stops blocking.
     const disable_prevention = usePreventRemove(draft !== null && !draft.finished && current > 0, () => go_to_page(current - 1));
 
@@ -100,58 +107,74 @@ export default function ReviewScreen()
     const button_disabled = is_last && !can_simulate;
 
     const bar = (
-        <View style={[styles.bar, { paddingBottom: 12 + insets.bottom }]}>
-            <Pressable
-                style={[styles.button, button_disabled && styles.button_disabled]}
-                onPress={press_button}
-                disabled={button_disabled}
-                accessibilityRole="button"
-                accessibilityState={{ disabled: button_disabled }}
-            >
-                <Text style={styles.button_text}>{button_text}</Text>
-            </Pressable>
-        </View>
+        <BottomBar on_height={set_bar_height}>
+            <PrimaryButton label={button_text} on_press={press_button} disabled={button_disabled} />
+        </BottomBar>
     );
     // the Settings option "Keep the Next button above the keyboard"; off leaves the bar behind the keyboard for more room
     const bar_above_keyboard = settings["bar_above_keyboard"];
 
     return (
         <View style={styles.screen}>
-            {/* the run's name in the header; iOS swipe-back only on the first page, since later pages go back a page instead */}
-            <Stack.Screen
-                options={{
-                    title: draft.name ?? "Review",
-                    gestureEnabled: current === 0,
-                    headerRight: () => <HomeButton disable_prevention={disable_prevention} />,
-                }}
-            />
+            <GlowBackground />
+            {/* iOS swipe-back only on the first page, since later pages go back a page instead */}
+            <Stack.Screen options={{ gestureEnabled: current === 0 }} />
 
-            <ProgressCircles pages={circles} current={current} on_jump={go_to_page} />
-            <Text style={styles.title}>{page.name}</Text>
+            {/* the top: back (a page, or to the intro from the first one), the page's number and title, home,
+                and the progress bar, on frosted glass with a soft shadow separating it from the page */}
+            <View style={[styles.top, { paddingTop: insets.top + 8 }]}>
+                <View style={styles.top_row}>
+                    <BackButton />
+                    <View style={styles.heading}>
+                        <Text style={styles.eyebrow}>Page {current + 1} of {pages.length}</Text>
+                        <Text style={styles.title} numberOfLines={2} accessibilityRole="header">{page.name}</Text>
+                    </View>
+                    <HomeButton disable_prevention={disable_prevention} />
+                </View>
+                <ProgressCircles pages={circles} current={current} on_jump={go_to_page} />
+            </View>
 
             {/* shrinks above the keyboard so the box being typed in stays visible (and the bar too, if it's inside).
-                "padding" on both platforms: Android's edge-to-edge mode doesn't resize the screen for the keyboard */}
-            <KeyboardAvoidingView style={styles.body} behavior="padding" keyboardVerticalOffset={header_height}>
-                {/* a new key per page starts each page scrolled to the top */}
-                <ScrollView key={current} style={styles.body} contentContainerStyle={styles.body_content} keyboardShouldPersistTaps="handled">
-                    {/* the reminder only shows on field pages of runs the AI filled in */}
-                    {is_ai_filled && page.kind !== "summary" ? <AiReminder /> : null}
-                    {content}
-                </ScrollView>
-                {bar_above_keyboard ? bar : null}
+                "padding" on both platforms: Android's edge-to-edge mode doesn't resize the screen for the keyboard.
+                No offset: with no header bar, this screen starts at the top of the window */}
+            <KeyboardAvoidingView style={styles.body} behavior="padding">
+                {/* no padding on this view, so the floating bar sits at its very bottom (just above the keyboard) */}
+                <View style={styles.body}>
+                    {/* a new key per page starts each page scrolled to the top. The end of the page gets room
+                        for the floating bar, so the last field can scroll out from under it */}
+                    <ScrollView
+                        key={current}
+                        style={styles.body}
+                        contentContainerStyle={[styles.body_content, { paddingBottom: bar_height + 20 }]}
+                        keyboardShouldPersistTaps="handled"
+                    >
+                        {/* the reminder only shows on field pages of runs the AI filled in */}
+                        {is_ai_filled && page.kind !== "summary" ? <AiReminder /> : null}
+                        {/* the fields sit on one glass card; the Summary has its own cards */}
+                        {page.kind === "summary" ? content : <View style={styles.card}>{content}</View>}
+                    </ScrollView>
+                    {bar_above_keyboard ? bar : null}
+                </View>
             </KeyboardAvoidingView>
             {bar_above_keyboard ? null : bar}
         </View>
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS, EYEBROW, CARD_SHADOW, HEADER_SHADOW }) => StyleSheet.create({
     screen: { flex: 1, backgroundColor: COLORS.background },
-    title: { fontSize: 22, fontWeight: "600", color: COLORS.text, paddingHorizontal: 20, paddingTop: 4, paddingBottom: 4 },
+    // above the page (zIndex) so its shadow isn't covered by it
+    top: { paddingBottom: 2, backgroundColor: COLORS.surface, zIndex: 1, ...HEADER_SHADOW },
+    top_row: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16 },
+    heading: { flex: 1, alignItems: "center", gap: 2 },
+    eyebrow: { ...EYEBROW, fontSize: 11 },
+    title: { fontSize: 20, fontFamily: FONTS.extrabold, color: COLORS.text, textAlign: "center", letterSpacing: -0.4 },
     body: { flex: 1 },
-    body_content: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 20 },
-    bar: { paddingHorizontal: 20, paddingTop: 12, borderTopWidth: 1, borderTopColor: COLORS.divider, backgroundColor: COLORS.surface },
-    button: { minHeight: 52, borderRadius: 8, backgroundColor: COLORS.accent, alignItems: "center", justifyContent: "center" },
-    button_disabled: { backgroundColor: COLORS.accent_disabled },
-    button_text: { fontSize: 18, fontWeight: "600", color: COLORS.on_accent },
+    // the bottom padding (room for the floating bar) is added in the component
+    body_content: { paddingHorizontal: 16, paddingTop: 18 },
+    // no bottom padding: every field already has space under it
+    card: {
+        paddingHorizontal: 18, paddingTop: 20, borderRadius: RADIUS.panel,
+        backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.glass_edge, ...CARD_SHADOW,
+    },
 });

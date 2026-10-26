@@ -1,8 +1,10 @@
 import { useContext, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
-import { STARRED_BOX, StarredContext } from "./StarredField.js";
-import { COLORS } from "./theme.js";
+import Gradient from "./Gradient.js";
+import { StarredContext } from "./StarredField.js";
+import { CENTERED_TEXT, FONTS, RADIUS } from "./theme.js";
+import { useTheme, useThemedStyles } from "./ThemeContext.js";
 
 // minutes after midnight -> what the boxes show
 function to_parts(value, default_pm)
@@ -64,6 +66,8 @@ function to_minutes(parts)
  */
 export default function TimeInput({ value, on_change, default_pm = false, has_error = false, label })
 {
+    const { COLORS, STARRED_BOX } = useTheme();
+    const styles = useThemedStyles(make_styles);
     const [parts, set_parts] = useState(to_parts(value, default_pm));
     // amber boxes when the AI couldn't fill this field (red wins if there's also a problem)
     const starred = useContext(StarredContext);
@@ -97,6 +101,7 @@ export default function TimeInput({ value, on_change, default_pm = false, has_er
                 inputMode="numeric"
                 maxLength={2}
                 placeholder="hh"
+                placeholderTextColor={COLORS.placeholder}
                 accessibilityLabel={`${label}, hour`}
             />
             <Text style={styles.colon}>:</Text>
@@ -107,6 +112,7 @@ export default function TimeInput({ value, on_change, default_pm = false, has_er
                 inputMode="numeric"
                 maxLength={2}
                 placeholder="mm"
+                placeholderTextColor={COLORS.placeholder}
                 accessibilityLabel={`${label}, minutes`}
             />
             <View style={styles.switch}>
@@ -117,11 +123,12 @@ export default function TimeInput({ value, on_change, default_pm = false, has_er
                         <Pressable
                             key={period}
                             onPress={() => update({ pm: period === "PM" })}
-                            style={[styles.period, selected && styles.period_selected]}
+                            style={styles.period}
                             accessibilityRole="button"
                             accessibilityState={{ selected: selected }}
                             accessibilityLabel={`${label}, ${period}`}
                         >
+                            {selected ? <Gradient name="button" style={StyleSheet.absoluteFill} /> : null}
                             <Text style={[styles.period_text, selected && styles.period_text_selected]}>{period}</Text>
                         </Pressable>
                     );
@@ -131,19 +138,19 @@ export default function TimeInput({ value, on_change, default_pm = false, has_er
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS }) => StyleSheet.create({
     row: { flexDirection: "row", alignItems: "center", gap: 6 },
     box: {
-        width: 56, minHeight: 48,
-        borderWidth: 2, borderColor: COLORS.border, borderRadius: 8,
-        fontSize: 18, color: COLORS.text, textAlign: "center", backgroundColor: COLORS.surface,
+        width: 58, minHeight: 50,
+        borderWidth: 1.5, borderColor: COLORS.border, borderRadius: RADIUS.input,
+        fontFamily: FONTS.regular, fontSize: 18, color: COLORS.text, textAlign: "center", backgroundColor: COLORS.surface,
     },
     // only the color changes: changing the border width while typing made some phones re-select the text
     box_error: { borderColor: COLORS.error },
-    colon: { fontSize: 20, color: COLORS.text },
-    switch: { flexDirection: "row", marginLeft: 8, borderWidth: 1, borderColor: COLORS.border, borderRadius: 8, overflow: "hidden" },
-    period: { minHeight: 48, paddingHorizontal: 12, justifyContent: "center", backgroundColor: COLORS.surface },
-    period_selected: { backgroundColor: COLORS.accent },
-    period_text: { fontSize: 16, color: COLORS.text },
-    period_text_selected: { color: COLORS.on_accent, fontWeight: "600" },
+    colon: { fontFamily: FONTS.bold, fontSize: 20, color: COLORS.text },
+    // a pill-shaped segmented control: the chosen half is a lime pill inside a softly tinted track
+    switch: { flexDirection: "row", marginLeft: 8, padding: 4, borderRadius: RADIUS.pill, backgroundColor: COLORS.segment_track },
+    period: { minHeight: 42, paddingHorizontal: 14, justifyContent: "center", borderRadius: RADIUS.pill, overflow: "hidden" },
+    period_text: { fontFamily: FONTS.semibold, fontSize: 15, color: COLORS.text_muted, ...CENTERED_TEXT },
+    period_text_selected: { color: COLORS.on_accent, fontFamily: FONTS.bold },
 });

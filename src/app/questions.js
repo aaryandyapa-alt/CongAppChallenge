@@ -1,14 +1,20 @@
-import { Redirect, Stack, router } from "expo-router";
-import { useHeaderHeight } from "expo-router/react-navigation";
+import { Redirect, router } from "expo-router";
 import { useState } from "react";
-import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { KeyboardAvoidingView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Ionicons } from "@react-native-vector-icons/ionicons";
 
+import BottomBar from "../components/BottomBar.js";
+import GlowBackground from "../components/GlowBackground.js";
 import HomeButton from "../components/HomeButton.js";
+import OutlineButton from "../components/OutlineButton.js";
+import PrimaryButton from "../components/PrimaryButton.js";
+import { BackButton } from "../components/RoundButton.js";
+import TopBar from "../components/TopBar.js";
 import { QUESTIONS } from "../lib/ai_client.js";
 import { useDraftRun } from "../state/DraftRunContext.js";
 import { useSettings } from "../state/SettingsContext.js";
-import { COLORS } from "../components/theme.js";
+import { FONTS, RADIUS } from "../components/theme.js";
+import { useTheme, useThemedStyles } from "../components/ThemeContext.js";
 
 /**
  * Simple mode: the five questions on one scrolling screen, answered in the user's own words.
@@ -16,13 +22,15 @@ import { COLORS } from "../components/theme.js";
  */
 export default function QuestionsScreen()
 {
+    const { COLORS } = useTheme();
+    const styles = useThemedStyles(make_styles);
     const { draft, save_answers, skip_questions } = useDraftRun();
     const { settings } = useSettings();
-    const insets = useSafeAreaInsets();
-    const header_height = useHeaderHeight();
     // start from earlier answers if the user came back from a later screen
     const [answers, set_answers] = useState(() => draft?.answers ?? Object.fromEntries(QUESTIONS.map((q) => [q.key, ""])));
     const [show_error, set_show_error] = useState(false);
+    // how much of the bottom the floating Submit bar covers; the page gets that much room at its end
+    const [bar_height, set_bar_height] = useState(0);
 
     if (draft === null)
         return <Redirect href="/" />;
@@ -48,72 +56,85 @@ export default function QuestionsScreen()
     }
 
     const bar = (
-        <View style={[styles.bar, { paddingBottom: 12 + insets.bottom }]}>
-            <Pressable style={styles.skip} onPress={skip} accessibilityRole="button" accessibilityHint="Skips the questions; every page starts blank">
-                <Text style={styles.skip_text}>Skip</Text>
-            </Pressable>
-            <Pressable style={styles.submit} onPress={submit} accessibilityRole="button">
-                <Text style={styles.submit_text}>Submit</Text>
-            </Pressable>
-        </View>
+        <BottomBar style={styles.bar} on_height={set_bar_height}>
+            <OutlineButton label="Skip" on_press={skip} style={styles.skip} hint="Skips the questions; every page starts blank" />
+            <PrimaryButton label="Submit" on_press={submit} style={styles.submit} />
+        </BottomBar>
     );
     // the Settings option "Keep the Next button above the keyboard" covers this Submit bar too
     const bar_above_keyboard = settings["bar_above_keyboard"];
 
     return (
         <View style={styles.screen}>
-            <Stack.Screen options={{ title: "Tell us about your site", headerRight: () => <HomeButton /> }} />
+            <GlowBackground />
+            <TopBar left={<BackButton />} right={<HomeButton />} eyebrow="Simple mode" title="Tell us about your site" />
             {/* shrinks above the keyboard so the box being typed in (and the bar, if it's inside) stay visible; see review.js */}
-            <KeyboardAvoidingView style={styles.fill} behavior="padding" keyboardVerticalOffset={header_height}>
-                <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
-                    <Text style={styles.intro}>
-                        Answer in your own words. We&apos;ll use your answers to fill in the details, and you&apos;ll check them next.
-                        Only the first question is needed.
-                    </Text>
-
-                    {QUESTIONS.map((q, i) => (
-                        <View key={q.key} style={styles.question}>
-                            <Text style={styles.question_text}>{i + 1}. {q.text}</Text>
-                            <TextInput
-                                style={[styles.box, i === 0 && show_error && steps_missing && styles.box_error]}
-                                value={answers[q.key]}
-                                onChangeText={(text) => set_answers({ ...answers, [q.key]: text })}
-                                multiline
-                                textAlignVertical="top"
-                                maxLength={1000}
-                                accessibilityLabel={q.text}
-                            />
-                            {i === 0 && show_error && steps_missing ? (
-                                <Text style={styles.error} accessibilityLiveRegion="polite">Please answer this one, or tap Skip to fill in the pages yourself.</Text>
-                            ) : null}
+            <KeyboardAvoidingView style={styles.fill} behavior="padding">
+                {/* no padding on this view, so the floating bar sits at its very bottom (just above the keyboard) */}
+                <View style={styles.fill}>
+                    {/* the end of the page gets room for the floating bar, so the last question can scroll out from under it */}
+                    <ScrollView contentContainerStyle={[styles.body, { paddingBottom: bar_height + 20 }]} keyboardShouldPersistTaps="handled">
+                        <Text style={styles.intro}>
+                            Answer in your own words. We&apos;ll use your answers to fill in the details, and you&apos;ll check them next.
+                            Only the first question is needed.
+                        </Text>
+                        {/* where the answers go, right before they're sent (only these answers ever leave the phone) */}
+                        <View style={styles.privacy}>
+                            <Ionicons name="lock-closed-outline" size={16} color={COLORS.accent_deep} />
+                            <Text style={styles.privacy_text}>
+                                Your answers are sent to Claude, an AI made by Anthropic, to fill in the details. Please don&apos;t include names or other personal information.
+                            </Text>
                         </View>
-                    ))}
-                </ScrollView>
-                {bar_above_keyboard ? bar : null}
+
+                        {QUESTIONS.map((q, i) => (
+                            <View key={q.key} style={styles.question}>
+                                <Text style={styles.question_text}>{i + 1}. {q.text}</Text>
+                                <TextInput
+                                    style={[styles.box, i === 0 && show_error && steps_missing && styles.box_error]}
+                                    value={answers[q.key]}
+                                    onChangeText={(text) => set_answers({ ...answers, [q.key]: text })}
+                                    multiline
+                                    textAlignVertical="top"
+                                    maxLength={1000}
+                                    accessibilityLabel={q.text}
+                                />
+                                {i === 0 && show_error && steps_missing ? (
+                                    <Text style={styles.error} accessibilityLiveRegion="polite">Please answer this one, or tap Skip to fill in the pages yourself.</Text>
+                                ) : null}
+                            </View>
+                        ))}
+                    </ScrollView>
+                    {bar_above_keyboard ? bar : null}
+                </View>
             </KeyboardAvoidingView>
             {bar_above_keyboard ? null : bar}
         </View>
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS }) => StyleSheet.create({
     screen: { flex: 1, backgroundColor: COLORS.background },
     fill: { flex: 1 },
-    body: { padding: 20, paddingBottom: 32 },
-    intro: { fontSize: 16, lineHeight: 22, color: COLORS.text_secondary, marginBottom: 20 },
+    // the bottom padding (room for the floating bar) is added in the component
+    body: { paddingHorizontal: 20, paddingTop: 8 },
+    intro: { fontFamily: FONTS.regular, fontSize: 16, lineHeight: 22, color: COLORS.text_secondary, marginBottom: 14 },
+    // a soft lime note with a lock, like the AI reminder chip
+    privacy: {
+        flexDirection: "row", alignItems: "flex-start", gap: 10, marginBottom: 22,
+        paddingHorizontal: 14, paddingVertical: 12, borderRadius: RADIUS.card, backgroundColor: COLORS.accent_tint,
+    },
+    privacy_text: { flex: 1, fontFamily: FONTS.regular, fontSize: 14, lineHeight: 20, color: COLORS.text_muted },
     question: { marginBottom: 22, gap: 8 },
-    question_text: { fontSize: 17, lineHeight: 24, fontWeight: "600", color: COLORS.text },
+    question_text: { fontSize: 17, lineHeight: 24, fontFamily: FONTS.bold, color: COLORS.text },
     box: {
-        minHeight: 110, padding: 12,
-        borderWidth: 2, borderColor: COLORS.border, borderRadius: 8,
-        fontSize: 17, lineHeight: 23, color: COLORS.text, backgroundColor: COLORS.surface,
+        minHeight: 110, padding: 14,
+        borderWidth: 1.5, borderColor: COLORS.border, borderRadius: RADIUS.input,
+        fontFamily: FONTS.regular, fontSize: 17, lineHeight: 23, color: COLORS.text, backgroundColor: COLORS.surface,
     },
     // only the color changes (see NumberInput)
     box_error: { borderColor: COLORS.error },
-    error: { fontSize: 15, color: COLORS.error },
-    bar: { flexDirection: "row", gap: 12, paddingHorizontal: 20, paddingTop: 12, borderTopWidth: 1, borderTopColor: COLORS.divider, backgroundColor: COLORS.surface },
-    skip: { flex: 1, minHeight: 52, borderRadius: 8, borderWidth: 2, borderColor: COLORS.accent, alignItems: "center", justifyContent: "center", backgroundColor: COLORS.surface },
-    skip_text: { fontSize: 18, fontWeight: "600", color: COLORS.accent },
-    submit: { flex: 2, minHeight: 52, borderRadius: 8, backgroundColor: COLORS.accent, alignItems: "center", justifyContent: "center" },
-    submit_text: { fontSize: 18, fontWeight: "600", color: COLORS.on_accent },
+    error: { fontFamily: FONTS.regular, fontSize: 15, color: COLORS.error },
+    bar: { flexDirection: "row" },
+    skip: { flex: 1 },
+    submit: { flex: 2 },
 });

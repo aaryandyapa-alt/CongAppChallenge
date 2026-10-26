@@ -2,8 +2,9 @@ import { useContext, useState } from "react";
 import { Modal, Pressable, StyleSheet, Text } from "react-native";
 import { Ionicons } from "@react-native-vector-icons/ionicons";
 
-import { STARRED_BOX, StarredContext } from "./StarredField.js";
-import { COLORS } from "./theme.js";
+import { StarredContext } from "./StarredField.js";
+import { FONTS, RADIUS } from "./theme.js";
+import { useTheme, useThemedStyles } from "./ThemeContext.js";
 
 // Simple mode wording; never statistical terms
 export const VARIANCE_OPTIONS = [
@@ -29,6 +30,8 @@ export const BURST_OPTIONS = [
  */
 export default function LevelPicker({ value, on_change, options, has_error = false, label })
 {
+    const { COLORS, STARRED_BOX } = useTheme();
+    const styles = useThemedStyles(make_styles);
     const [open, set_open] = useState(false);
     const selected = options.find((o) => o.value === value);
     // amber box when the AI couldn't fill this field (red wins if there's also a problem)
@@ -71,7 +74,7 @@ export default function LevelPicker({ value, on_change, options, has_error = fal
                                     accessibilityState={{ selected: is_selected }}
                                 >
                                     <Text style={styles.option_text}>{o.label}</Text>
-                                    {is_selected ? <Ionicons name="checkmark" size={20} color={COLORS.accent} /> : null}
+                                    {is_selected ? <Ionicons name="checkmark" size={20} color={COLORS.accent_text} /> : null}
                                 </Pressable>
                             );
                         })}
@@ -82,19 +85,23 @@ export default function LevelPicker({ value, on_change, options, has_error = fal
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS, EYEBROW, PANEL_SHADOW }) => StyleSheet.create({
     box: {
-        minHeight: 48, minWidth: 180, paddingHorizontal: 12, gap: 8,
+        minHeight: 50, minWidth: 180, paddingHorizontal: 14, gap: 8,
         flexDirection: "row", alignItems: "center", justifyContent: "space-between",
-        borderWidth: 2, borderColor: COLORS.border, borderRadius: 8, backgroundColor: COLORS.surface,
+        borderWidth: 1.5, borderColor: COLORS.border, borderRadius: RADIUS.input, backgroundColor: COLORS.surface,
     },
     box_error: { borderColor: COLORS.error },
-    box_text: { fontSize: 17, color: COLORS.text },
+    box_text: { fontFamily: FONTS.regular, fontSize: 17, color: COLORS.text },
     placeholder: { color: COLORS.placeholder },
     backdrop: { flex: 1, backgroundColor: COLORS.backdrop, justifyContent: "center", padding: 24 },
-    sheet: { backgroundColor: COLORS.surface, borderRadius: 12, paddingVertical: 8 },
-    title: { fontSize: 16, fontWeight: "600", color: COLORS.text_muted, paddingHorizontal: 16, paddingVertical: 12 },
-    option: { minHeight: 52, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-    option_selected: { backgroundColor: COLORS.accent_light },
-    option_text: { fontSize: 18, color: COLORS.text },
+    // a white panel like the pop-up boxes, with rounded options inside
+    sheet: { backgroundColor: COLORS.surface_solid, borderRadius: RADIUS.panel, padding: 10, ...PANEL_SHADOW },
+    title: { ...EYEBROW, paddingHorizontal: 14, paddingTop: 10, paddingBottom: 8 },
+    option: {
+        minHeight: 54, paddingHorizontal: 14, borderRadius: RADIUS.card,
+        flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+    },
+    option_selected: { backgroundColor: COLORS.accent_tint },
+    option_text: { fontFamily: FONTS.regular, fontSize: 18, color: COLORS.text },
 });

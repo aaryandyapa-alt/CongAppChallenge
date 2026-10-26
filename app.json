@@ -6,7 +6,8 @@
     "scheme": "shiftlime",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#FAFCF4",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.shiftlime.app"
@@ -14,9 +15,8 @@
     "android": {
       "package": "com.shiftlime.app",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#F3F7E8",
         "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       }
     },
@@ -27,7 +27,18 @@
     "plugins": [
       "expo-router",
       "@react-native-vector-icons/ionicons",
-      "expo-font"
+      "expo-font",
+      "expo-system-ui",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FAFCF4",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160,
+          "resizeMode": "contain"
+        }
+      ],
+      "expo-asset"
     ],
     "extra": {
       "router": {

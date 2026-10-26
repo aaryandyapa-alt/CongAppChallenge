@@ -1,12 +1,18 @@
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@react-native-vector-icons/ionicons";
 
+import BrandHeader from "../../components/BrandHeader.js";
+import GlowBackground from "../../components/GlowBackground.js";
+import Gradient from "../../components/Gradient.js";
+import { Mark } from "../../components/Logo.js";
 import { format_date_time } from "../../components/TimeInput.js";
 import { useSettings } from "../../state/SettingsContext.js";
 import { list_runs, load_info } from "../../storage.js";
-import { COLORS } from "../../components/theme.js";
+import { FONTS, RADIUS, TAB_BAR } from "../../components/theme.js";
+import { useTheme, useThemedStyles } from "../../components/ThemeContext.js";
 
 // every saved run with its run_info.json, newest first
 async function load_runs()
@@ -25,12 +31,15 @@ async function load_runs()
  */
 export default function HomeScreen()
 {
+    const { COLORS } = useTheme();
+    const styles = useThemedStyles(make_styles);
     // null while loading
     const [runs, set_runs] = useState(null);
     const [search, set_search] = useState("");
     const { settings, loaded } = useSettings();
     // only open it once per app launch, even if Home re-renders before the tutorial marks itself seen
     const opened_tutorial = useRef(false);
+    const insets = useSafeAreaInsets();
 
     // first launch: show the welcome tutorial, once the saved settings are in (so returning users never see a flash of it)
     useEffect(() =>
@@ -76,26 +85,40 @@ export default function HomeScreen()
                     <Text style={styles.row_name}>{item.name}</Text>
                     <Text style={styles.row_detail}>{[format_date_time(item.date_run), mode].filter(Boolean).join("  ·  ")}</Text>
                 </View>
-                <Ionicons name="chevron-forward" size={22} color={COLORS.text_muted} />
+                <View style={styles.chevron}>
+                    <Ionicons name="chevron-forward" size={18} color={COLORS.accent_deep} />
+                </View>
             </Pressable>
         );
     }
 
+    // the floating tab bar covers the bottom of the screen, so the list and the New button sit above it
+    const above_tab_bar = insets.bottom + TAB_BAR.gap + TAB_BAR.height;
+
     return (
         <View style={styles.screen}>
+            <GlowBackground />
+            <BrandHeader />
             {runs !== null && runs.length === 0 ? (
-                <View style={styles.empty}>
-                    <Text style={styles.empty_text}>No runs yet. Tap New to set up your first one.</Text>
+                // the first time: the ShiftLime clock in a soft lime glow, and a pointer to the New button.
+                // Kept clear of the floating tab bar and the New button at the bottom
+                <View style={[styles.empty, { paddingBottom: above_tab_bar + 72 }]}>
+                    <View style={styles.empty_mark}>
+                        <Mark size={96} />
+                    </View>
+                    <Text style={styles.empty_eyebrow}>Welcome</Text>
+                    <Text style={styles.empty_title}>No runs yet</Text>
+                    <Text style={styles.empty_text}>Tap New to describe your site and find the best way to split your workers.</Text>
                 </View>
             ) : (
                 <>
                     {/* outside the list, so typing doesn't lose focus as the list changes */}
                     <View style={styles.top}>
-                        <Text style={styles.heading}>Your runs</Text>
                         <View style={styles.search}>
                             <Ionicons name="search" size={20} color={COLORS.text_faint} />
                             <TextInput
                                 style={styles.search_input}
+                                placeholderTextColor={COLORS.placeholder}
                                 value={search}
                                 onChangeText={set_search}
                                 placeholder="Search runs"
@@ -109,51 +132,69 @@ export default function HomeScreen()
                                 </Pressable>
                             ) : null}
                         </View>
+                        <Text style={styles.eyebrow}>{runs === null ? "Your runs" : `Your runs · ${runs.length}`}</Text>
                     </View>
                     <FlatList
                         data={shown}
                         keyExtractor={(item) => item.name}
                         renderItem={render_run}
-                        contentContainerStyle={styles.list}
+                        contentContainerStyle={[styles.list, { paddingBottom: above_tab_bar + 90 }]}
                         keyboardShouldPersistTaps="handled"
                         ListEmptyComponent={runs !== null ? <Text style={styles.no_match}>No runs match &quot;{search.trim()}&quot;.</Text> : null}
                     />
                 </>
             )}
 
-            <Pressable style={styles.new} onPress={() => router.push("/new-run")} accessibilityRole="button" accessibilityLabel="New run">
-                <Ionicons name="add" size={24} color={COLORS.on_accent} />
-                <Text style={styles.new_text}>New</Text>
+            {/* the shadow is on the outside, the gradient (with its rounded corners) inside */}
+            <Pressable
+                style={({ pressed }) => [styles.new, { bottom: above_tab_bar + 16 }, pressed && styles.new_pressed]}
+                onPress={() => router.push("/new-run")}
+                accessibilityRole="button"
+                accessibilityLabel="New run"
+            >
+                <Gradient name="button" style={styles.new_fill}>
+                    <Ionicons name="add" size={24} color={COLORS.on_accent} />
+                    <Text style={styles.new_text}>New</Text>
+                </Gradient>
             </Pressable>
         </View>
     );
 }
 
-const styles = StyleSheet.create({
+const make_styles = ({ COLORS, EYEBROW, CARD_SHADOW, FLOATING_SHADOW }) => StyleSheet.create({
     screen: { flex: 1, backgroundColor: COLORS.background },
-    top: { paddingHorizontal: 16, paddingTop: 16, gap: 12 },
-    heading: { fontSize: 22, fontWeight: "700", color: COLORS.text },
+    top: { paddingHorizontal: 16, paddingTop: 16, gap: 18 },
+    // a glass pill
     search: {
-        flexDirection: "row", alignItems: "center", gap: 8, minHeight: 48, paddingHorizontal: 12,
-        borderRadius: 10, borderWidth: 2, borderColor: COLORS.border, backgroundColor: COLORS.surface,
+        flexDirection: "row", alignItems: "center", gap: 8, minHeight: 50, paddingHorizontal: 16,
+        borderRadius: RADIUS.pill, borderWidth: 1.5, borderColor: COLORS.border, backgroundColor: COLORS.surface,
     },
-    search_input: { flex: 1, fontSize: 17, color: COLORS.text, paddingVertical: 8 },
-    // room at the bottom so the New button never covers the last run
-    list: { padding: 16, paddingBottom: 96 },
-    no_match: { fontSize: 16, color: COLORS.text_muted, textAlign: "center", marginTop: 24 },
+    search_input: { flex: 1, fontFamily: FONTS.regular, fontSize: 17, color: COLORS.text, paddingVertical: 8 },
+    eyebrow: { ...EYEBROW, paddingHorizontal: 6 },
+    // the bottom padding (room for the tab bar and the New button) is added in the component
+    list: { paddingHorizontal: 16, paddingTop: 10 },
+    no_match: { fontFamily: FONTS.regular, fontSize: 16, color: COLORS.text_muted, textAlign: "center", marginTop: 24 },
+    // glass cards
     row: {
-        flexDirection: "row", alignItems: "center", gap: 12, minHeight: 68, padding: 14, marginBottom: 10,
-        borderRadius: 10, borderWidth: 2, borderColor: COLORS.border, backgroundColor: COLORS.surface,
+        flexDirection: "row", alignItems: "center", gap: 12, minHeight: 72, paddingVertical: 14, paddingLeft: 18, paddingRight: 14, marginBottom: 12,
+        borderRadius: RADIUS.card, backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.glass_edge, ...CARD_SHADOW,
     },
     row_text: { flex: 1, gap: 4 },
-    row_name: { fontSize: 18, fontWeight: "600", color: COLORS.text },
-    row_detail: { fontSize: 15, color: COLORS.text_muted },
-    empty: { flex: 1, alignItems: "center", justifyContent: "center", padding: 32 },
-    empty_text: { fontSize: 18, lineHeight: 26, color: COLORS.text_secondary, textAlign: "center" },
-    new: {
-        position: "absolute", right: 20, bottom: 20, minHeight: 56, paddingHorizontal: 22, borderRadius: 28,
-        flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: COLORS.accent,
-        elevation: 4, shadowColor: COLORS.shadow, shadowOpacity: 0.2, shadowRadius: 6, shadowOffset: { width: 0, height: 3 },
+    row_name: { fontSize: 17, fontFamily: FONTS.bold, color: COLORS.text },
+    row_detail: { fontFamily: FONTS.medium, fontSize: 14, color: COLORS.text_muted },
+    // the arrow sits in a small lime circle
+    chevron: { width: 32, height: 32, borderRadius: 16, alignItems: "center", justifyContent: "center", backgroundColor: COLORS.accent_tint },
+    empty: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 36, paddingTop: 24 },
+    // the mark sits in a soft lime circle that glows a little past its edge
+    empty_mark: {
+        width: 140, height: 140, borderRadius: 70, alignItems: "center", justifyContent: "center", marginBottom: 22,
+        backgroundColor: COLORS.accent_tint, boxShadow: "0px 0px 0px 12px rgba(127, 212, 106, 0.08)",
     },
-    new_text: { fontSize: 18, fontWeight: "600", color: COLORS.on_accent },
+    empty_eyebrow: { ...EYEBROW, marginBottom: 6 },
+    empty_title: { fontSize: 26, fontFamily: FONTS.extrabold, color: COLORS.text, letterSpacing: -0.5, marginBottom: 8 },
+    empty_text: { fontFamily: FONTS.regular, fontSize: 16, lineHeight: 23, color: COLORS.text_secondary, textAlign: "center" },
+    new: { position: "absolute", right: 20, borderRadius: RADIUS.pill, ...FLOATING_SHADOW },
+    new_pressed: { opacity: 0.9, transform: [{ scale: 0.98 }] },
+    new_fill: { minHeight: 56, paddingHorizontal: 22, borderRadius: RADIUS.pill, overflow: "hidden", flexDirection: "row", alignItems: "center", gap: 6 },
+    new_text: { fontSize: 17, fontFamily: FONTS.bold, color: COLORS.on_accent },
 });
