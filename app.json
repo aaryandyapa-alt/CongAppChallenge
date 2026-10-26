@@ -35,13 +35,10 @@
           "backgroundColor": "#FAFCF4",
           "image": "./assets/splash-icon.png",
           "imageWidth": 160,
-          "resizeMode": "contain",
-          "dark": {
-            "backgroundColor": "#0F1611",
-            "image": "./assets/splash-icon.png"
-          }
+          "resizeMode": "contain"
         }
-      ]
+      ],
+      "expo-asset"
     ],
     "extra": {
       "router": {

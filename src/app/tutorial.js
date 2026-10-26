@@ -1,3 +1,4 @@
+import { Asset } from "expo-asset";
 import { Stack, router } from "expo-router";
 import { useRef, useState } from "react";
 import { FlatList, Image, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
@@ -35,22 +36,22 @@ const SLIDES = [
         text: "Plan your queue before the rush. Describe how people move through your site, and ShiftLime tests every way to split your workers.",
     },
     {
-        image: null,
-        image_label: null,
+        image: require("../../assets/tutorial/questions_rounded.png"),
+        image_label: "The Simple mode questions screen, starting with: what are the steps someone goes through, in order?",
         icon: "create-outline",
         title: "Describe your site",
         text: "Choose Simple to answer five questions in your own words (we'll fill in the details for you to check) or Advanced to set everything yourself.",
     },
     {
-        image: null,
-        image_label: null,
+        image: require("../../assets/tutorial/review_rounded.png"),
+        image_label: "A review page about arrivals, with a red circle on the progress bar and a field in red that still needs a number",
         icon: "checkmark-done-outline",
         title: "Check the details",
         text: "Go through a few short pages. Anything marked ★ in amber was a guess, so give it a look. Red means something still needs fixing.",
     },
     {
-        image: null,
-        image_label: null,
+        image: require("../../assets/tutorial/results_rounded.png"),
+        image_label: "A results page showing the shortest average wait: 7.7 minutes, down from 1 hour 21 minutes",
         icon: "bar-chart-outline",
         title: "See what works best",
         text: "ShiftLime compares the shortest average wait, the shortest long waits, and the most even workload. You choose what matters most for your site.",
@@ -64,6 +65,11 @@ const SLIDES = [
     },
 ];
 
+// Start loading the slides' pictures as soon as the app starts (this file is loaded then), not when the tutorial
+// opens, so they're ready before anyone swipes to them. Mostly matters in development, where pictures come over the
+// network from the computer; in a built app they're on the phone already. A failure just means they load when shown.
+Asset.loadAsync(SLIDES.map((slide) => slide.image).filter(Boolean)).catch(() => {});
+
 // "Sample run", or "Sample run 2", "Sample run 3"... if that name is taken
 function sample_name()
 {
@@ -72,6 +78,42 @@ function sample_name()
     for (let n = 2; check_run_name(name, existing) !== null; n++)
         name = `${SAMPLE_NAME} ${n}`;
     return name;
+}
+
+// the screenshots' rounded corners, as a share of their width (all three are cut at about 92 px of ~1340)
+const PICTURE_CORNER = 0.069;
+
+/**
+ * A slide's picture: it takes the space above the text, scaled to fit without cropping or stretching, with a soft
+ * shadow so it stands out from the page. The shadow is on a frame sized to exactly the picture's visible shape
+ * (corners included), so it doesn't outline the empty space around a picture that's narrower than its slot.
+ */
+function SlidePicture({ source })
+{
+    const styles = useThemedStyles(make_styles);
+    // the space the picture can use, once it's been laid out
+    const [area, set_area] = useState(null);
+    const { width: picture_width, height: picture_height } = Image.resolveAssetSource(source);
+
+    let frame = null;
+    if (area !== null)
+    {
+        const scale = Math.min(area.width / picture_width, area.height / picture_height);
+        const width = picture_width * scale;
+        frame = { width: width, height: picture_height * scale, borderRadius: width * PICTURE_CORNER };
+    }
+
+    return (
+        <View style={styles.picture_area} onLayout={(e) => set_area(e.nativeEvent.layout)}>
+            {frame ? (
+                <View style={[styles.picture_frame, frame]}>
+                    {/* keeps Android's soft fade-in; the pictures are loaded ahead of time (see Asset.loadAsync above),
+                        so the fade starts straight away instead of after a blank pause */}
+                    <Image source={source} style={styles.picture} resizeMode="contain" />
+                </View>
+            ) : null}
+        </View>
+    );
 }
 
 /**
@@ -137,6 +179,11 @@ export default function TutorialScreen()
                 showsHorizontalScrollIndicator={false}
                 getItemLayout={(_, i) => ({ length: width, offset: width * i, index: i })}
                 onMomentumScrollEnd={(e) => set_index(Math.round(e.nativeEvent.contentOffset.x / width))}
+                // draw every slide up front and keep them attached while off screen, so their pictures are decoded and
+                // ready before they're swiped to (by default Android detaches off-screen slides until they come into view)
+                initialNumToRender={SLIDES.length}
+                windowSize={SLIDES.length * 2 + 1}
+                removeClippedSubviews={false}
                 renderItem={({ item }) => (
                     <View
                         style={[styles.slide, { width: width }]}
@@ -144,10 +191,7 @@ export default function TutorialScreen()
                         accessibilityLabel={`${item.title}. ${item.text}${item.image && item.image_label ? ` Picture: ${item.image_label}.` : ""}`}
                     >
                         {item.image ? (
-                            // the picture takes the space above the text, scaled to fit without cropping or stretching
-                            <View style={styles.picture_area}>
-                                <Image source={item.image} style={styles.picture} resizeMode="contain" />
-                            </View>
+                            <SlidePicture source={item.image} />
                         ) : item.mark ? (
                             <Mark size={150} />
                         ) : (
@@ -186,14 +230,17 @@ export default function TutorialScreen()
     );
 }
 
-const make_styles = ({ COLORS }) => StyleSheet.create({
+const make_styles = ({ COLORS, PANEL_SHADOW }) => StyleSheet.create({
     screen: { flex: 1, backgroundColor: COLORS.background },
     // keeps the same height whether or not Skip is showing, so the slides don't jump
     top_bar: { height: 48, paddingHorizontal: 20, alignItems: "flex-end", justifyContent: "center" },
     skip: { fontSize: 16, fontFamily: FONTS.bold, color: COLORS.accent_deep },
     slide: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32, gap: 20 },
     // grows to fill the room above the title and text; the picture scales down inside it
-    picture_area: { flex: 1, alignSelf: "stretch", minHeight: 160, marginTop: 8 },
+    // the picture is centered in the space it has
+    picture_area: { flex: 1, alignSelf: "stretch", minHeight: 160, marginTop: 8, alignItems: "center", justifyContent: "center" },
+    // the soft, wide shadow that floating panels use; its corners follow the screenshot's
+    picture_frame: { ...PANEL_SHADOW },
     picture: { width: "100%", height: "100%" },
     // with a soft lime glow around it
     icon_circle: {

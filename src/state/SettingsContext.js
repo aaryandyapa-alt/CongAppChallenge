@@ -7,8 +7,9 @@ import { load_settings, save_settings } from "../storage.js";
  * A setting that was never changed uses its default below.
  */
 export const DEFAULT_SETTINGS = {
-    // "light", "dark", or "system" (follow the phone's own setting); see components/ThemeContext.js
-    "appearance": "system",
+    // "light", "dark", or "system" (follow the phone's own setting); see components/ThemeContext.js.
+    // Light unless the user picks otherwise in Settings > Appearance
+    "appearance": "light",
     // round arrow buttons on the results pages; small-phone users can turn them off for more room
     "results_arrows": true,
     // keep the Next / Submit bar above the keyboard; off leaves it behind the keyboard so the page has more room

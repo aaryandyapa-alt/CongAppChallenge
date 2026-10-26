@@ -7,7 +7,8 @@ import { DARK, LIGHT } from "./theme.js";
 const ThemeContext = createContext(LIGHT);
 
 /**
- * Picks the light or dark theme (theme.js) from the Appearance setting: "light", "dark", or "system" (follow the phone).
+ * Picks the light or dark theme (theme.js) from the Appearance setting: "light" (the default), "dark", or "system"
+ * (follow the phone).
  * Wraps the app inside SettingsProvider in src/app/_layout.js.
  */
 export function ThemeProvider({ children })

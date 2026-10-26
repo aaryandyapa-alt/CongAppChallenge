@@ -13,7 +13,7 @@ import * as SystemUI from "expo-system-ui";
 import { useEffect, useMemo } from "react";
 
 import { DraftRunProvider } from "../state/DraftRunContext.js";
-import { SettingsProvider } from "../state/SettingsContext.js";
+import { SettingsProvider, useSettings } from "../state/SettingsContext.js";
 import { ThemeProvider, useTheme } from "../components/ThemeContext.js";
 
 // keep the splash screen up until the fonts are in, so text never flashes in the phone's own font first
@@ -23,6 +23,15 @@ SplashScreen.preventAutoHideAsync();
 function AppStack()
 {
     const { COLORS, dark } = useTheme();
+    const { loaded } = useSettings();
+
+    // hide the splash screen once the saved settings are in, so someone who chose Dark goes straight into dark mode
+    // (the app starts drawing in the default Light until then). Loading the settings always finishes, even without a file.
+    useEffect(() =>
+    {
+        if (loaded)
+            SplashScreen.hideAsync();
+    }, [loaded]);
 
     // The navigator has its own theme, whose white background showed for a moment between screens (a white flash
     // in dark mode). Give it the page color, and the phone's window behind the app too.
@@ -71,13 +80,8 @@ export default function RootLayout()
         PlusJakartaSans_800ExtraBold,
     });
 
-    useEffect(() =>
-    {
-        // if the fonts fail to load, carry on in the phone's font rather than staying on the splash screen
-        if (loaded || error)
-            SplashScreen.hideAsync();
-    }, [loaded, error]);
-
+    // the splash screen stays up until the fonts are in (or fail to load: then carry on in the phone's font),
+    // and then until the saved settings are in (AppStack hides it)
     if (!loaded && !error)
         return null;
 
