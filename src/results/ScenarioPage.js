@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from "react-native";
 
 import PathDiagram, { variance_text } from "../components/PathDiagram.js";
 import { BALANCE_EXPLAINED, compared_with_current, measures, scenario_sentence, TITLES } from "../lib/result_sentences.js";
-import { FONTS, RADIUS } from "../components/theme.js";
+import { CENTERED_TEXT, FONTS, RADIUS } from "../components/theme.js";
 import { useThemedStyles } from "../components/ThemeContext.js";
 
 /**
@@ -77,7 +77,7 @@ const make_styles = ({ COLORS, EYEBROW, CARD_SHADOW }) => StyleSheet.create({
     // "down from 6.8 min" as a soft lime chip
     compared: {
         alignSelf: "flex-start", marginTop: 4, paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, overflow: "hidden",
-        fontSize: 14, fontFamily: FONTS.bold, color: COLORS.accent_deep, backgroundColor: COLORS.accent_tint,
+        fontSize: 14, fontFamily: FONTS.bold, color: COLORS.accent_deep, backgroundColor: COLORS.accent_tint, ...CENTERED_TEXT,
     },
     sentence: { fontFamily: FONTS.regular, fontSize: 17, lineHeight: 25, color: COLORS.text, marginBottom: 18 },
     // the other two measures, on one glass card

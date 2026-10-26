@@ -11,7 +11,7 @@ import { Mark } from "../../components/Logo.js";
 import { format_date_time } from "../../components/TimeInput.js";
 import { useSettings } from "../../state/SettingsContext.js";
 import { list_runs, load_info } from "../../storage.js";
-import { FONTS, RADIUS, TAB_BAR } from "../../components/theme.js";
+import { CENTERED_TEXT, FONTS, RADIUS, TAB_BAR } from "../../components/theme.js";
 import { useTheme, useThemedStyles } from "../../components/ThemeContext.js";
 
 // every saved run with its run_info.json, newest first
@@ -196,5 +196,5 @@ const make_styles = ({ COLORS, EYEBROW, CARD_SHADOW, FLOATING_SHADOW }) => Style
     new: { position: "absolute", right: 20, borderRadius: RADIUS.pill, ...FLOATING_SHADOW },
     new_pressed: { opacity: 0.9, transform: [{ scale: 0.98 }] },
     new_fill: { minHeight: 56, paddingHorizontal: 22, borderRadius: RADIUS.pill, overflow: "hidden", flexDirection: "row", alignItems: "center", gap: 6 },
-    new_text: { fontSize: 17, fontFamily: FONTS.bold, color: COLORS.on_accent },
+    new_text: { fontSize: 17, fontFamily: FONTS.bold, color: COLORS.on_accent, ...CENTERED_TEXT },
 });

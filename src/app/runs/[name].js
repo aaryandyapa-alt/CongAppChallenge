@@ -14,7 +14,7 @@ import { schema_to_form } from "../../lib/form_to_schema.js";
 import SummaryPage from "../../review/SummaryPage.js";
 import { useDraftRun } from "../../state/DraftRunContext.js";
 import { delete_run, load_info, load_input } from "../../storage.js";
-import { FONTS, RADIUS } from "../../components/theme.js";
+import { CENTERED_TEXT, FONTS, RADIUS } from "../../components/theme.js";
 import { useThemedStyles } from "../../components/ThemeContext.js";
 
 /**
@@ -125,6 +125,7 @@ const make_styles = ({ COLORS }) => StyleSheet.create({
     chip: {
         fontFamily: FONTS.semibold, fontSize: 13, color: COLORS.accent_deep,
         paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: COLORS.accent_tint, overflow: "hidden",
+        ...CENTERED_TEXT,
     },
     row: { flexDirection: "row", gap: 10 },
     half: { flex: 1 },

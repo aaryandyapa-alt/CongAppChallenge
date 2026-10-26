@@ -12,6 +12,7 @@ import Logo from "../../components/Logo.js";
 import OutlineButton from "../../components/OutlineButton.js";
 import ToggleSwitch from "../../components/ToggleSwitch.js";
 import { DEV_PRESETS } from "../../lib/dev_presets.js";
+import { SAMPLE_PRACTICE, SAMPLE_SCHEMA, sample_name } from "../../lib/sample_run.js";
 import { useDraftRun } from "../../state/DraftRunContext.js";
 import { useSettings } from "../../state/SettingsContext.js";
 import { delete_run, list_runs } from "../../storage.js";
@@ -46,7 +47,7 @@ export default function SettingsScreen()
 {
     const { COLORS } = useTheme();
     const styles = useThemedStyles(make_styles);
-    const { begin_duplicate, set_name, go_to_page } = useDraftRun();
+    const { begin_duplicate, begin_sample, set_name, go_to_page } = useDraftRun();
     const { settings, change_setting } = useSettings();
     const insets = useSafeAreaInsets();
     // the Developer section starts closed so it stays out of the way
@@ -82,6 +83,16 @@ export default function SettingsScreen()
         set_name(`${preset.short} preset ${stamp}`);
         // past the last page; review.js shows the last page (Summary)
         go_to_page(999);
+        router.push("/review");
+    }
+
+    // the tutorial's sample run with the same amber and red fields but none of its explanation bubbles,
+    // straight into the first review page: for taking screenshots
+    function load_screenshot_run()
+    {
+        begin_sample(SAMPLE_SCHEMA, { ...SAMPLE_PRACTICE, hints: {} });
+        set_name(sample_name());
+        go_to_page(0);
         router.push("/review");
     }
 
@@ -169,6 +180,9 @@ export default function SettingsScreen()
                         {DEV_PRESETS.map((p) => (
                             <OutlineButton key={p.short} label={p.label} on_press={() => load_preset(p)} compact on_card />
                         ))}
+                        <View style={styles.divider} />
+                        <Text style={styles.dev_note}>The tutorial&apos;s sample run with its amber and red fields but no explanation bubbles, on its first review page, for screenshots.</Text>
+                        <OutlineButton label="Screenshot run" icon="camera-outline" on_press={load_screenshot_run} compact on_card />
                     </View>
                 ) : null}
             </ScrollView>

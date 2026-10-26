@@ -11,11 +11,9 @@ import { Mark } from "../components/Logo.js";
 import OutlineButton from "../components/OutlineButton.js";
 import PrimaryButton from "../components/PrimaryButton.js";
 import { FONTS } from "../components/theme.js";
-import { check_run_name } from "../lib/form_checks.js";
-import { SAMPLE_NAME, SAMPLE_SCHEMA } from "../lib/sample_run.js";
+import { SAMPLE_PRACTICE, SAMPLE_SCHEMA, sample_name } from "../lib/sample_run.js";
 import { useDraftRun } from "../state/DraftRunContext.js";
 import { useSettings } from "../state/SettingsContext.js";
-import { list_runs } from "../storage.js";
 import { useTheme, useThemedStyles } from "../components/ThemeContext.js";
 
 /**
@@ -43,8 +41,8 @@ const SLIDES = [
         text: "Choose Simple to answer five questions in your own words (we'll fill in the details for you to check) or Advanced to set everything yourself.",
     },
     {
-        image: require("../../assets/tutorial/review_rounded.png"),
-        image_label: "A review page about arrivals, with a red circle on the progress bar and a field in red that still needs a number",
+        image: require("../../assets/tutorial/review_rounded_new.png"),
+        image_label: "A review page about arrivals: a field in red that still needs a number, and a starred amber dropdown to check, with matching red and amber circles on the progress bar",
         icon: "checkmark-done-outline",
         title: "Check the details",
         text: "Go through a few short pages. Anything marked ★ in amber was a guess, so give it a look. Red means something still needs fixing.",
@@ -61,7 +59,7 @@ const SLIDES = [
         image_label: null,
         icon: "rocket-outline",
         title: "Ready?",
-        text: "Start your own run, or try a sample run to see how it all works.",
+        text: "Try a sample run to see how it all works, or go Home and tap New to start your own.",
     },
 ];
 
@@ -69,16 +67,6 @@ const SLIDES = [
 // opens, so they're ready before anyone swipes to them. Mostly matters in development, where pictures come over the
 // network from the computer; in a built app they're on the phone already. A failure just means they load when shown.
 Asset.loadAsync(SLIDES.map((slide) => slide.image).filter(Boolean)).catch(() => {});
-
-// "Sample run", or "Sample run 2", "Sample run 3"... if that name is taken
-function sample_name()
-{
-    const existing = list_runs();
-    let name = SAMPLE_NAME;
-    for (let n = 2; check_run_name(name, existing) !== null; n++)
-        name = `${SAMPLE_NAME} ${n}`;
-    return name;
-}
 
 // the screenshots' rounded corners, as a share of their width (all three are cut at about 92 px of ~1340)
 const PICTURE_CORNER = 0.069;
@@ -127,7 +115,7 @@ export default function TutorialScreen()
     const { width } = useWindowDimensions();
     const insets = useSafeAreaInsets();
     const { change_setting } = useSettings();
-    const { begin_duplicate, set_name, go_to_page } = useDraftRun();
+    const { begin_sample, set_name, go_to_page } = useDraftRun();
     const list = useRef(null);
     const [index, set_index] = useState(0);
     const is_last = index === SLIDES.length - 1;
@@ -146,15 +134,16 @@ export default function TutorialScreen()
     }
 
     const skip = () => close(() => router.back());
-    const start_own = () => close(() => router.replace("/new-run"));
-    // loads the sample as a Simple run on its Summary page, one tap from Start simulation
+    // back to Home's run list, even when the tutorial was replayed from Settings
+    const go_home = () => close(() => router.dismissTo("/"));
+    // loads the sample as a Simple run with its practice spots (a few amber and red fields with callouts),
+    // then the intro explains them before the first review page
     const try_sample = () => close(() =>
     {
-        begin_duplicate("simple", SAMPLE_SCHEMA);
+        begin_sample(SAMPLE_SCHEMA, SAMPLE_PRACTICE);
         set_name(sample_name());
-        // past the last page; review.js shows the last page (Summary)
-        go_to_page(999);
-        router.replace("/review");
+        go_to_page(0);
+        router.replace("/intro");
     });
 
     return (
@@ -214,13 +203,14 @@ export default function TutorialScreen()
             <View style={styles.buttons}>
                 {is_last ? (
                     <>
-                        <PrimaryButton label="Start my own" on_press={start_own} />
-                        <OutlineButton
+                        {/* the sample run is the main (lime) button: the best way to learn the app */}
+                        <PrimaryButton
                             label="Try a sample run"
                             icon="play-circle-outline"
                             on_press={try_sample}
-                            hint="Loads an example food bank run, ready to simulate"
+                            hint="Loads an example food bank run with a few marked fields to practice on"
                         />
+                        <OutlineButton label="Home" icon="home-outline" on_press={go_home} />
                     </>
                 ) : (
                     <PrimaryButton label="Next" on_press={() => go_to(index + 1)} />

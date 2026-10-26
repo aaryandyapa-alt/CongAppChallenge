@@ -12,6 +12,7 @@ const MESSAGES = {
     "ai-full": "We've filled in every page from your answers. Please double-check each value, since the AI can make mistakes.",
     "ai-partial": "We've filled in what we could from your answers. Fields marked with ★ couldn't be worked out and were given a default value, so please review and fix them.",
     "ai-failed": "We didn't catch anything from your answers, so please fill in each page yourself.",
+    "sample": "This is an example food pantry. We've marked a few fields for you to practice on: ★ amber means a guess to check, and red means something to fix. Follow the notes on each page, then start the simulation.",
 };
 
 /**
