@@ -42,7 +42,7 @@ const SLIDES = [
     },
     {
         image: require("../../assets/tutorial/review_rounded_new.png"),
-        image_label: "A review page about arrivals, with a red circle on the progress bar and a field in red that still needs a number",
+        image_label: "A review page about arrivals: a field in red that still needs a number, and a starred amber dropdown to check, with matching red and amber circles on the progress bar",
         icon: "checkmark-done-outline",
         title: "Check the details",
         text: "Go through a few short pages. Anything marked ★ in amber was a guess, so give it a look. Red means something still needs fixing.",
