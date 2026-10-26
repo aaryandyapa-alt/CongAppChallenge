@@ -10,11 +10,12 @@ import { check_form, MAX_STATIONS } from "../lib/form_checks.js";
  * Draft shape (null when there's no draft):
  * {
  *   name, mode,              // mode is "simple" or "pro"; name is null for a duplicate until it's named
- *   start_state,             // "pro", "skipped", "ai-full", "ai-partial", "ai-failed" or "duplicate"; null before the questions
+ *   start_state,             // "pro", "skipped", "ai-full", "ai-partial", "ai-failed", "duplicate" or "sample"; null before the questions
+ *   hints,                   // sample run only: practice callouts by form path (see lib/sample_run.js)
  *   page,                    // the review page being shown
  *   form,                    // see lib/form_to_schema.js
  *   starred,                 // form paths like "stations.1.minutes" -> true, for fields the AI couldn't fill;
- *                            // a field's star clears as soon as its value changes
+ *                            // a field's star clears as soon as the user sets it (even to the same value)
  *   answers,                 // Simple mode: the five question answers, once submitted (missing before then)
  *   finished,                // true once the simulation is done and the run is saved (missing before then)
  * }
@@ -47,6 +48,17 @@ export function draft_reducer(draft, action)
         case "begin_duplicate":
             return new_draft(null, action.mode, "duplicate", schema_to_form(action.schema).form, {});
 
+        // the tutorial's sample run, as a Simple run with practice spots (lib/sample_run.js): some fields starred,
+        // some left blank (so they show red), and a callout for each (draft.hints, read by field_status)
+        case "begin_sample":
+        {
+            let form = schema_to_form(action.schema).form;
+            for (const path of action.practice.blank)
+                form = set_path(form, path.split(".").map((k) => /^\d+$/.test(k) ? Number(k) : k), null);
+            const starred = Object.fromEntries(action.practice.starred.map((path) => [path, true]));
+            return { ...new_draft(null, "simple", "sample", form, starred), hints: action.practice.hints };
+        }
+
         case "set_name":
             return { ...draft, name: action.name };
 
@@ -72,7 +84,6 @@ export function draft_reducer(draft, action)
         case "edit_field":
         {
             const keys = action.path.split(".").map((k) => /^\d+$/.test(k) ? Number(k) : k);
-            const old_value = keys.reduce((obj, k) => obj?.[k], draft.form);
             let form = set_path(draft.form, keys, action.value);
 
             // adding stations: reuse removed ones from the cache, and only make new ones past the end of it
@@ -84,10 +95,11 @@ export function draft_reducer(draft, action)
                 form = { ...form, stations: [...form.stations, ...added] };
             }
 
-            // a starred field loses its star as soon as its value actually changes
-            // (choosing the same dropdown option again doesn't count; Object.is so NaN equals NaN)
+            // a starred field loses its star as soon as the user deliberately sets it, even to the value it already had:
+            // choosing the AI's guess again in a dropdown (or tapping the AM / PM already chosen) confirms the guess.
+            // Typed boxes only report when their text changes, so just looking at one doesn't clear it
             let starred = draft.starred;
-            if (starred[action.path] && !Object.is(old_value, action.value))
+            if (starred[action.path])
             {
                 starred = { ...starred };
                 delete starred[action.path];
@@ -123,6 +135,7 @@ export function DraftRunProvider({ children })
     const actions = useMemo(() => ({
         begin_run: (name, mode) => dispatch({ type: "begin_run", name: name, mode: mode }),
         begin_duplicate: (mode, schema) => dispatch({ type: "begin_duplicate", mode: mode, schema: schema }),
+        begin_sample: (schema, practice) => dispatch({ type: "begin_sample", schema: schema, practice: practice }),
         set_name: (name) => dispatch({ type: "set_name", name: name }),
         save_answers: (answers) => dispatch({ type: "save_answers", answers: answers }),
         skip_questions: () => dispatch({ type: "skip_questions" }),
@@ -141,11 +154,18 @@ export function DraftRunProvider({ children })
 }
 
 /**
- * The star and error for one field, ready to spread onto a StarredField: <StarredField {...field_status(draft, errors, path)} />
+ * The star, error and practice callout for one field, ready to spread onto a StarredField:
+ * <StarredField {...field_status(draft, errors, path)} />
+ * The callout (sample run only) shows until it's dealt with: an amber one while the field is starred,
+ * a red one while it has a problem.
  */
 export function field_status(draft, errors, path)
 {
-    return { starred: !!draft.starred[path], error: errors[path] ?? null };
+    const starred = !!draft.starred[path];
+    const error = errors[path] ?? null;
+    const hint = draft.hints?.[path] ?? null;
+    const show_hint = hint !== null && (hint.kind === "amber" ? starred : error !== null);
+    return { starred: starred, error: error, hint: show_hint ? hint : null };
 }
 
 /**

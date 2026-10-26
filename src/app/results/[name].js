@@ -12,6 +12,7 @@ import { BackButton } from "../../components/RoundButton.js";
 import TopBar from "../../components/TopBar.js";
 import { schema_to_form } from "../../lib/form_to_schema.js";
 import { SCENARIOS } from "../../lib/result_sentences.js";
+import HowItWorksPage from "../../results/HowItWorksPage.js";
 import ResultsSummaryPage from "../../results/ResultsSummaryPage.js";
 import ScenarioPage from "../../results/ScenarioPage.js";
 import { useSettings } from "../../state/SettingsContext.js";
@@ -19,8 +20,8 @@ import { load_info, load_input, load_output } from "../../storage.js";
 import { FONTS } from "../../components/theme.js";
 import { useTheme, useThemedStyles } from "../../components/ThemeContext.js";
 
-// the four scenario pages, then the Summary
-const PAGES = [...SCENARIOS, "summary"];
+// "How it works" (what the app did), the four scenario pages, then the Summary
+const PAGES = ["how", ...SCENARIOS, "summary"];
 
 // a round arrow button at the middle of one side; faded and untappable when there's no page that way
 function Arrow({ side, enabled, on_press })
@@ -47,8 +48,9 @@ function Arrow({ side, enabled, on_press })
 }
 
 /**
- * A saved run's results: five pages you swipe (or tap the arrows, unless they're turned off in Settings) through.
- * Opened right after a simulation (?from=new) it starts on the current setup; from Home it starts on the Summary.
+ * A saved run's results: six pages you swipe (or tap the arrows, unless they're turned off in Settings) through:
+ * How it works, the four scenarios, and the Summary.
+ * Opened right after a simulation (?from=new) it starts on How it works; from Home it starts on the Summary.
  */
 export default function ResultsScreen()
 {
@@ -103,9 +105,14 @@ export default function ResultsScreen()
         return (
             // the end of each page gets room for the floating bar, so its last line can scroll out from under it
             <ScrollView style={{ width: width }} contentContainerStyle={[styles.page, !show_arrows && styles.page_no_arrows, { paddingBottom: bar_height + 20 }]}>
-                {item === "summary"
-                    ? <ResultsSummaryPage output={run.output} on_jump={go_to} on_home={() => router.dismissTo("/")} />
-                    : <ScenarioPage scenario_key={item} output={run.output} form={form} pro={pro} />}
+                {item === "how" ? (
+                    <HowItWorksPage output={run.output} on_continue={() => go_to(1)} />
+                ) : item === "summary" ? (
+                    // the Summary jumps by scenario (0 to 3); How it works comes first, so each scenario is one page later
+                    <ResultsSummaryPage output={run.output} on_jump={(i) => go_to(PAGES.indexOf(SCENARIOS[i]))} on_home={() => router.dismissTo("/")} />
+                ) : (
+                    <ScenarioPage scenario_key={item} output={run.output} form={form} pro={pro} />
+                )}
             </ScrollView>
         );
     }

@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@react-native-vector-icons/ionicons";
-import { FONTS, RADIUS } from "./theme.js";
+import { CENTERED_TEXT, FONTS, RADIUS } from "./theme.js";
 import { useTheme, useThemedStyles } from "./ThemeContext.js";
 
 /**
@@ -25,5 +25,5 @@ const make_styles = ({ COLORS }) => StyleSheet.create({
         flexDirection: "row", alignItems: "center", gap: 8, alignSelf: "flex-start", marginBottom: 16,
         paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLORS.accent_tint,
     },
-    text: { flexShrink: 1, fontFamily: FONTS.italic, fontSize: 14, color: COLORS.text_muted },
+    text: { flexShrink: 1, fontFamily: FONTS.italic, fontSize: 14, color: COLORS.text_muted, ...CENTERED_TEXT },
 });
