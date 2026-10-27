@@ -40,6 +40,9 @@ yarn-error.*
 /ios
 /android
 
+# Android Studio's own settings
+.idea/
+
 # # claude
 # .claude/
 # AGENTS.md

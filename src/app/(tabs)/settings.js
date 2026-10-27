@@ -12,6 +12,9 @@ import Logo from "../../components/Logo.js";
 import OutlineButton from "../../components/OutlineButton.js";
 import ToggleSwitch from "../../components/ToggleSwitch.js";
 import { DEV_PRESETS } from "../../lib/dev_presets.js";
+import { EXAMPLE_RUNS, example_date } from "../../lib/example_runs.js";
+import { check_run_name } from "../../lib/form_checks.js";
+import { save_example_run } from "../../lib/start_run.js";
 import { SAMPLE_PRACTICE, SAMPLE_SCHEMA, sample_name } from "../../lib/sample_run.js";
 import { useDraftRun } from "../../state/DraftRunContext.js";
 import { useSettings } from "../../state/SettingsContext.js";
@@ -52,6 +55,8 @@ export default function SettingsScreen()
     const insets = useSafeAreaInsets();
     // the Developer section starts closed so it stays out of the way
     const [developer_open, set_developer_open] = useState(false);
+    // Add example runs: null, "adding" while it works, or a message once it's done
+    const [examples_status, set_examples_status] = useState(null);
     // the Delete all runs box, and how many runs there were when it was opened
     // (kept after closing, so the box's text doesn't change while it fades out)
     const [delete_box, set_delete_box] = useState({ open: false, count: 0 });
@@ -88,6 +93,29 @@ export default function SettingsScreen()
 
     // the tutorial's sample run with the same amber and red fields but none of its explanation bubbles,
     // straight into the first review page: for taking screenshots
+    // saves the realistic example runs (lib/example_runs.js) for screenshots of Home, simulating each one for real
+    // (they're small: well under a second in all). Names that are already taken are skipped, so it's safe to tap twice
+    async function add_example_runs()
+    {
+        if (examples_status === "adding")
+            return;
+        set_examples_status("adding");
+        const existing = list_runs();
+        let added = 0;
+        for (const run of EXAMPLE_RUNS)
+        {
+            if (check_run_name(run.name, existing) !== null)
+                continue;
+            // let the screen show "Adding..." before the simulating starts
+            await new Promise((resolve) => setTimeout(resolve, 0));
+            await save_example_run(run.name, run.mode, run.schema, example_date(run));
+            added++;
+        }
+        set_examples_status(added === 0
+            ? "The example runs are already on Home."
+            : `Added ${added} example ${added === 1 ? "run" : "runs"} to Home. Delete them one at a time from each run, or with Delete all runs.`);
+    }
+
     function load_screenshot_run()
     {
         begin_sample(SAMPLE_SCHEMA, { ...SAMPLE_PRACTICE, hints: {} });
@@ -183,6 +211,18 @@ export default function SettingsScreen()
                         <View style={styles.divider} />
                         <Text style={styles.dev_note}>The tutorial&apos;s sample run with its amber and red fields but no explanation bubbles, on its first review page, for screenshots.</Text>
                         <OutlineButton label="Screenshot run" icon="camera-outline" on_press={load_screenshot_run} compact on_card />
+                        <View style={styles.divider} />
+                        <Text style={styles.dev_note}>Fills Home with realistic example runs (a pantry, a clinic, a turkey giveaway...) for screenshots. Each one opens real results.</Text>
+                        <OutlineButton
+                            label={examples_status === "adding" ? "Adding example runs..." : "Add example runs"}
+                            icon="albums-outline"
+                            on_press={add_example_runs}
+                            compact
+                            on_card
+                        />
+                        {examples_status && examples_status !== "adding" ? (
+                            <Text style={styles.dev_note} accessibilityLiveRegion="polite">{examples_status}</Text>
+                        ) : null}
                     </View>
                 ) : null}
             </ScrollView>
