@@ -2,7 +2,7 @@
 
 // the only file in the app that imports the engine
 import convert_check_schema from "../convert_check_schema.js";
-import { run_optimizer_steps } from "../optimization.js";
+import run_optimizer, { run_optimizer_steps } from "../optimization.js";
 import { save_input, save_output, save_info } from "../storage.js";
 import { form_to_schema } from "./form_to_schema.js";
 
@@ -56,4 +56,24 @@ export default async function start_run(name, mode, form, on_progress)
     await save_output(name, output);
     await save_info(name, { "name": name, "mode": mode, "date_run": new Date().toISOString(), "simulation_seconds": simulation_seconds });
     return output;
+}
+
+/**
+ * Settings > Developer > Add example runs: simulates a ready-made input schema (lib/example_runs.js) all at once
+ * (they're small) and saves it as a run dated date_run, exactly like a real one.
+ *
+ * @param {string} name - The run's name, which is also its folder name.
+ * @param {string} mode - "simple" or "pro".
+ * @param {object} schema - A valid input schema.
+ * @param {string} date_run - When it was "run", as an ISO date.
+ */
+export async function save_example_run(name, mode, schema, date_run)
+{
+    const started_at = Date.now();
+    const output = run_optimizer(convert_check_schema(schema));
+    const simulation_seconds = (Date.now() - started_at) / 1000;
+
+    await save_input(name, schema);
+    await save_output(name, output);
+    await save_info(name, { "name": name, "mode": mode, "date_run": date_run, "simulation_seconds": simulation_seconds });
 }
