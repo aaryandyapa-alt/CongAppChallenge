@@ -8,7 +8,7 @@ import OutlineButton from "../components/OutlineButton.js";
 import PrimaryButton from "../components/PrimaryButton.js";
 import { BackButton } from "../components/RoundButton.js";
 import TopBar from "../components/TopBar.js";
-import { extract } from "../lib/ai_client.js";
+import { AiLimitError, extract } from "../lib/ai_client.js";
 import { useDraftRun } from "../state/DraftRunContext.js";
 import { FONTS, RADIUS } from "../components/theme.js";
 import { useThemedStyles } from "../components/ThemeContext.js";
@@ -21,7 +21,8 @@ export default function GeneratingScreen()
 {
     const styles = useThemedStyles(make_styles);
     const { draft, fill_from_ai, skip_questions } = useDraftRun();
-    const [failed, set_failed] = useState(false);
+    // null while it's working, then "unreachable" (no connection or the AI failed) or "limit" (used too often lately)
+    const [failed, set_failed] = useState(null);
     // bumped by Try again to send the answers again
     const [attempt, set_attempt] = useState(0);
     const answers = draft?.answers;
@@ -41,10 +42,10 @@ export default function GeneratingScreen()
                 // replace, so Back from the intro returns to the questions, not to this spinner
                 router.replace("/intro");
             })
-            .catch(() =>
+            .catch((error) =>
             {
                 if (active)
-                    set_failed(true);
+                    set_failed(error instanceof AiLimitError ? "limit" : "unreachable");
             });
         return () =>
         {
@@ -64,15 +65,26 @@ export default function GeneratingScreen()
                 <TopBar left={<BackButton />} />
                 <View style={styles.error_body}>
                     <View style={styles.error_card}>
-                        <Text style={styles.error_title}>Couldn&apos;t reach the AI</Text>
-                        <Text style={styles.error_text}>
-                            Check your connection and try again, or fill in the pages yourself.
-                        </Text>
+                        {failed === "limit" ? (
+                            <>
+                                <Text style={styles.error_title}>The AI needs a break</Text>
+                                <Text style={styles.error_text}>
+                                    This phone has used the AI a lot recently. Fill in the pages yourself, or try again later.
+                                </Text>
+                            </>
+                        ) : (
+                            <>
+                                <Text style={styles.error_title}>Couldn&apos;t reach the AI</Text>
+                                <Text style={styles.error_text}>
+                                    Check your connection and try again, or fill in the pages yourself.
+                                </Text>
+                            </>
+                        )}
                         <PrimaryButton
                             label="Try again"
                             on_press={() =>
                             {
-                                set_failed(false);
+                                set_failed(null);
                                 set_attempt(attempt + 1);
                             }}
                         />

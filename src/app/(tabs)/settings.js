@@ -14,6 +14,7 @@ import ToggleSwitch from "../../components/ToggleSwitch.js";
 import { DEV_PRESETS } from "../../lib/dev_presets.js";
 import { EXAMPLE_RUNS, example_date } from "../../lib/example_runs.js";
 import { check_run_name } from "../../lib/form_checks.js";
+import { CONTACT_EMAIL, email_team, open_privacy_policy } from "../../lib/links.js";
 import { save_example_run } from "../../lib/start_run.js";
 import { SAMPLE_PRACTICE, SAMPLE_SCHEMA, sample_name } from "../../lib/sample_run.js";
 import { useDraftRun } from "../../state/DraftRunContext.js";
@@ -21,6 +22,11 @@ import { useSettings } from "../../state/SettingsContext.js";
 import { delete_run, list_runs } from "../../storage.js";
 import { CENTERED_TEXT, FONTS, RADIUS, TAB_BAR } from "../../components/theme.js";
 import { useTheme, useThemedStyles } from "../../components/ThemeContext.js";
+
+// the Developer section (test presets, timings, screenshot helpers) is for the team only: it shows while developing
+// (Expo Go or a dev build) and in preview APKs, which set EXPO_PUBLIC_SHOW_DEVELOPER in eas.json, but not in the
+// Google Play build
+const SHOW_DEVELOPER = __DEV__ || process.env.EXPO_PUBLIC_SHOW_DEVELOPER === "true";
 
 // the Appearance choices (setting "appearance"; see components/ThemeContext.js)
 const APPEARANCES = [
@@ -57,6 +63,13 @@ export default function SettingsScreen()
     const [developer_open, set_developer_open] = useState(false);
     // Add example runs: null, "adding" while it works, or a message once it's done
     const [examples_status, set_examples_status] = useState(null);
+    // Contact us found no email app to open, so the address is shown instead
+    const [no_email_app, set_no_email_app] = useState(false);
+
+    async function contact()
+    {
+        set_no_email_app(!(await email_team("ShiftLime")));
+    }
     // the Delete all runs box, and how many runs there were when it was opened
     // (kept after closing, so the box's text doesn't change while it fades out)
     const [delete_box, set_delete_box] = useState({ open: false, count: 0 });
@@ -177,24 +190,40 @@ export default function SettingsScreen()
                     <Text style={styles.setting_note}>
                         Your runs are saved only on this phone. In Simple mode, your answers to the five questions are sent to Claude, an AI made by Anthropic, to fill in the details. Nothing else leaves your phone.
                     </Text>
+                    {/* the full policy (a web page, also given to Google Play) and a way to reach the team */}
+                    <View style={styles.links}>
+                        <Pressable style={styles.link} onPress={open_privacy_policy} hitSlop={8} accessibilityRole="link" accessibilityHint="Opens in your browser">
+                            <Ionicons name="shield-checkmark-outline" size={16} color={COLORS.accent_deep} />
+                            <Text style={styles.link_text}>Privacy policy</Text>
+                        </Pressable>
+                        <Pressable style={styles.link} onPress={contact} hitSlop={8} accessibilityRole="link" accessibilityHint="Opens an email to the ShiftLime team">
+                            <Ionicons name="mail-outline" size={16} color={COLORS.accent_deep} />
+                            <Text style={styles.link_text}>Contact us</Text>
+                        </Pressable>
+                    </View>
+                    {no_email_app ? (
+                        <Text style={styles.setting_note} accessibilityLiveRegion="polite" selectable>Email us at {CONTACT_EMAIL}</Text>
+                    ) : null}
                     <OutlineButton label="Replay tutorial" icon="play-circle-outline" on_press={() => router.push("/tutorial")} compact on_card style={styles.replay} />
                 </View>
 
                 <Text style={styles.heading}>Saved runs</Text>
                 <OutlineButton label="Delete all runs" on_press={ask_delete_all} danger />
 
-                {/* collapsed by default; tap the heading to show the test presets */}
-                <Pressable
-                    style={styles.dropdown_heading}
-                    onPress={() => set_developer_open(!developer_open)}
-                    accessibilityRole="button"
-                    accessibilityState={{ expanded: developer_open }}
-                    accessibilityLabel="Developer"
-                >
-                    <Text style={styles.heading}>Developer</Text>
-                    <Ionicons name={developer_open ? "chevron-up" : "chevron-down"} size={22} color={COLORS.text_muted} />
-                </Pressable>
-                {developer_open ? (
+                {/* only in the team's own builds (see SHOW_DEVELOPER); collapsed by default, tap the heading to open it */}
+                {SHOW_DEVELOPER ? (
+                    <Pressable
+                        style={styles.dropdown_heading}
+                        onPress={() => set_developer_open(!developer_open)}
+                        accessibilityRole="button"
+                        accessibilityState={{ expanded: developer_open }}
+                        accessibilityLabel="Developer"
+                    >
+                        <Text style={styles.heading}>Developer</Text>
+                        <Ionicons name={developer_open ? "chevron-up" : "chevron-down"} size={22} color={COLORS.text_muted} />
+                    </Pressable>
+                ) : null}
+                {SHOW_DEVELOPER && developer_open ? (
                     <View style={styles.card}>
                         <View style={styles.setting_row}>
                             <View style={styles.setting_text}>
@@ -265,6 +294,9 @@ const make_styles = ({ COLORS, EYEBROW, CARD_SHADOW }) => StyleSheet.create({
     },
     about: { fontFamily: FONTS.regular, fontSize: 16, lineHeight: 23, color: COLORS.text },
     about_logo: { marginBottom: 4 },
+    links: { flexDirection: "row", flexWrap: "wrap", gap: 18, marginTop: 2 },
+    link: { flexDirection: "row", alignItems: "center", gap: 6, minHeight: 32 },
+    link_text: { fontFamily: FONTS.semibold, fontSize: 15, color: COLORS.accent_deep, textDecorationLine: "underline" },
     replay: { marginTop: 4 },
     setting_row: { flexDirection: "row", alignItems: "center", gap: 12 },
     setting_text: { flex: 1, gap: 4 },
