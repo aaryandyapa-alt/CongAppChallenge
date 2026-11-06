@@ -27,11 +27,14 @@ export { QUESTIONS } from "./questions.js";
 
 // thrown when the AI can't be reached or gives back something unusable
 export class AiUnreachableError extends Error {}
+// thrown when this device has used the AI too often lately (the server's rate limit, src/lib/rate_limit.js)
+export class AiLimitError extends AiUnreachableError {}
 
 /**
  * @param {object} answers - { steps, workers, times, arrivals, hours }, each the text the user typed.
  * @returns {Promise<{schema: object, missing_fields: string[]}>}
- * @throws {AiUnreachableError} No connection, the proxy failed, it took too long, or the reply wasn't JSON.
+ * @throws {AiUnreachableError} No connection, the proxy failed, it took too long, or the reply wasn't JSON;
+ *     AiLimitError (a kind of it) if this device has used the AI too often lately.
  */
 export async function extract(answers)
 {
@@ -50,6 +53,8 @@ export async function extract(answers)
             body: JSON.stringify({ "answers": answers }),
             signal: controller.signal,
         });
+        if (response.status === 429)
+            throw new AiLimitError("Too many requests from this device");
         if (!response.ok)
             throw new AiUnreachableError(`The proxy answered with status ${response.status}`);
         const body = await response.json();

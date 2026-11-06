@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 
 import { build_user_message, check_answers, EXTRACTION_SCHEMA, extraction_to_schema, SYSTEM_PROMPT } from "../../lib/ai_extraction.js";
+import { check_rate_limit } from "../../lib/rate_limit.js";
 
 /**
  * POST /api/extract: the AI extraction proxy. This is server code (the "+api" in the file name): it runs on the
@@ -29,6 +30,11 @@ export async function POST(request)
     const app_token = process.env.AI_APP_TOKEN;
     if (app_token && request.headers.get("x-app-token") !== app_token)
         return Response.json({ error: "Not allowed." }, { status: 401 });
+
+    // how often one device can use the AI (see src/lib/rate_limit.js); EAS Hosting gives the caller's address in X-Real-IP
+    const limit = await check_rate_limit(request.headers.get("x-real-ip") ?? "unknown");
+    if (!limit.allowed)
+        return Response.json({ error: `Too many requests from this device. Try again ${limit.wait_text}.` }, { status: 429 });
 
     let body;
     try
