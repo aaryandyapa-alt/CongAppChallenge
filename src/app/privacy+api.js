@@ -5,7 +5,7 @@
  */
 
 const CONTACT = "shiftlimeapp@gmail.com";
-const UPDATED = "November 1, 2026";
+const UPDATED = "November 8, 2026";
 
 const PAGE = `<!doctype html>
 <html lang="en">
@@ -50,7 +50,8 @@ It's made by a small student team. This policy explains what happens to the info
 <h2>What stays on your phone</h2>
 <p>The runs you create (names, opening hours, stations, workers, times and arrival numbers), their results, and your
 settings (like light or dark mode) are stored only on your device. They aren't sent to us or anyone else. The
-simulation that finds the best way to split your workers runs entirely on your phone.</p>
+simulation that finds the best way to split your workers runs entirely on your phone. If your phone backs up app
+data to your Google account, Android may include your runs in that backup, which only you can restore.</p>
 
 <h2>What's sent when you use the AI (Simple mode)</h2>
 <p>In Simple mode you can answer five questions in your own words. When you tap <strong>Submit</strong>, those five
@@ -67,8 +68,9 @@ answers are sent over an encrypted connection to our server, which passes them t
 <h2>Technical information</h2>
 <p>Like any internet service, our server (hosted by Expo, on Cloudflare's network) receives your device's IP address when
 the AI is used. We use it only to limit how often one device can use the AI, so the service stays available for
-everyone. It's kept in the server's memory for at most a day and is never saved or shared. Our hosting provider may keep
-standard short-term technical logs to run and secure the service.</p>
+everyone. We count requests in a database (Upstash) under a scrambled form of the address, never the address itself,
+and each count deletes itself automatically within a day. Nothing is shared. Our hosting provider may keep standard
+short-term technical logs to run and secure the service.</p>
 
 <h2>Deleting your information</h2>
 <p>You can delete any run from its page, or all of them with <strong>Settings &gt; Delete all runs</strong>.

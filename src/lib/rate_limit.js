@@ -46,10 +46,17 @@ export async function check_rate_limit(ip, now = Date.now())
 
 // ---- shared counts (Upstash Redis) ----
 
-// Fixed windows: one counter per device per window (e.g. this 10 minutes), which expires when the window ends.
-function shared_counters(ip, now)
+// The address is stored only as a scrambled (SHA-256) form, so the database never holds anyone's actual IP address.
+async function hashed(ip)
 {
-    const per_device = LIMITS.map((limit) => ({ limit, key: `rl:${limit.name}:${ip}:${Math.floor(now / limit.window_ms)}` }));
+    const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`shiftlime:${ip}`));
+    return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+// Fixed windows: one counter per device per window (e.g. this 10 minutes), which expires when the window ends.
+function shared_counters(device, now)
+{
+    const per_device = LIMITS.map((limit) => ({ limit, key: `rl:${limit.name}:${device}:${Math.floor(now / limit.window_ms)}` }));
     const everyone = { limit: GLOBAL_LIMIT, key: `rl:${GLOBAL_LIMIT.name}:${Math.floor(now / GLOBAL_LIMIT.window_ms)}` };
     return [everyone, ...per_device];
 }
@@ -76,7 +83,7 @@ async function upstash(url, token, commands)
 // arriving at the same moment can both slip under a limit by one; that's fine here.
 async function check_shared(url, token, ip, now)
 {
-    const counters = shared_counters(ip, now);
+    const counters = shared_counters(await hashed(ip), now);
     const counts = await upstash(url, token, counters.map(({ key }) => ["GET", key]));
     for (let i = 0; i < counters.length; i++)
     {
